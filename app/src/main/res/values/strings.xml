@@ -1,0 +1,32 @@
+<resources>
+    <string name="app_name">Music</string>
+
+    <string name="title">Music</string>
+    <string name="theme_color">Theme Color</string>
+    <string name="sleep_timer">Sleep Timer</string>
+    <string name="rate_app">Rate This App</string>
+    <string name="about">About</string>
+    <string name="search">Search</string>
+    <string name="favorites">Favorites</string>
+    <string name="about_text">Music is an application to play mp3 music on your android device. With simple interface make you enjoy the music
+        easily.
+    </string>
+    <string name="ok">OK</string>
+    <string name="start_time">0.00</string>
+    <string name="final_time">0.00</string>
+    <string name="search_hint">Song Name</string>
+    <string name="no">No</string>
+    <string name="yes">Yes</string>
+    <string name="delete">Delete</string>
+    <string name="delete_text"> Are you sure you want to delete</string>
+    <string name="play_next">Play Next</string>
+    <string name="minh_bkav_com">minhmx@bkav.com</string>
+    <string name="listen_now">Listen Now</string>
+    <string name="recent">Recent</string>
+    <string name="library">Library</string>
+    <string name="favorite">Favorite</string>
+    <string name="subtitle">SubTitle</string>
+    <string name="player">Media</string>
+    <string name="setting">Setting</string>
+    <string name="other">Other</string>
+</resources>

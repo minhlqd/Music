@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+    <ImageView
+        android:id="@+id/img_btn_replay"
+        style="@style/ImageButtonPlayer"
+        android:layout_marginStart="20dp"
+        android:layout_marginBottom="20dp"
+        android:src="@drawable/ic_repeat"
+        android:layout_marginLeft="20dp" />
+    <ImageView
+        android:id="@+id/img_btn_shuffle"
+        style="@style/ImageButtonPlayer"
+        android:layout_marginEnd="20dp"
+        android:layout_marginBottom="20dp"
+        android:layout_alignParentEnd="true"
+        android:src="@drawable/ic_shuffle"
+        android:layout_marginRight="20dp"
+        android:layout_alignParentRight="true" />
+
+    <RelativeLayout
+        android:background="#DAD2D2"
+        android:layout_below="@+id/img_btn_replay"
+        android:layout_width="match_parent"
+        android:layout_height="100dp">
+        <TextView
+            android:layout_marginStart="5dp"
+            android:layout_marginLeft="5dp"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentLeft="true"
+            android:id="@+id/tv_current_time"
+            android:layout_below="@+id/seekbar_controller"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/start_time"
+            android:textColor="@color/text_color"
+            android:textSize="15sp"
+            android:textStyle="bold" />
+
+        <SeekBar
+            android:id="@+id/seekbar_controller"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fitsSystemWindows="true"
+            android:progressTint="#ED6438"
+            android:thumbTint="#ED6438"
+            tools:ignore="UnusedAttribute" />
+
+        <TextView
+            android:layout_marginEnd="5dp"
+            android:layout_marginRight="5dp"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_below="@id/seekbar_controller"
+            android:id="@+id/tv_total_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/final_time"
+            android:textColor="@color/text_color"
+            android:textSize="15sp"
+            android:textStyle="bold" />
+
+
+        <LinearLayout
+            android:layout_below="@+id/tv_total_time"
+            android:id="@+id/ll_player_controls"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center">
+
+            <ImageButton
+                android:id="@+id/img_btn_like"
+                style="@style/ImageButtonPlayer"
+                android:src="@drawable/ic_like"
+                android:layout_marginStart="20dp"
+                android:layout_marginLeft="20dp"/>
+
+            <ImageButton
+                android:layout_marginStart="20dp"
+                android:layout_marginLeft="20dp"
+                android:id="@+id/img_btn_previous"
+                style="@style/ImageButtonPlayer"
+                android:src="@drawable/previous_icon" />
+
+            <ImageButton
+                android:layout_marginLeft="30dp"
+                android:layout_marginStart="30dp"
+                android:id="@+id/img_btn_play"
+                android:layout_width="45dp"
+                android:layout_height="45dp"
+                android:src="@drawable/ic_play_black" />
+
+            <ImageButton
+                android:layout_marginLeft="30dp"
+                android:layout_marginStart="30dp"
+                android:id="@+id/img_btn_next"
+                style="@style/ImageButtonPlayer"
+                android:src="@drawable/next_icon" />
+
+            <ImageButton
+                android:layout_marginLeft="20dp"
+                android:layout_marginStart="20dp"
+                android:id="@+id/img_btn_dislike"
+                style="@style/ImageButtonPlayer"
+                android:src="@drawable/ic_dislike"/>
+        </LinearLayout>
+    </RelativeLayout>
+
+</RelativeLayout>
