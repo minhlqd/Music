@@ -68,7 +68,6 @@ public class FavoritesOperations {
         Cursor cursor = database.query(DatabaseHandler.TABLE_SONGS, allColumns,
                 null, null, null, null, null);
         ArrayList<SongsList> favSongs = new ArrayList<>();
-        Log.d(TAG, "getAllFavorites: " + cursor.getCount());
         if (cursor.getCount() > 0) {
             while (cursor.moveToNext()) {
                 SongsList songsList = new SongsList(cursor.getString(cursor.getColumnIndex(DatabaseHandler.COLUMN_TITLE))

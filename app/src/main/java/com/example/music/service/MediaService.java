@@ -101,19 +101,17 @@ public class MediaService extends Service {
                 .setContentText(subtitle)
                 .setSmallIcon(R.drawable.ic_music_a)
                 .setLargeIcon(bitmap)
-//                .setContentIntent(pendingIntentActivity)
                 .addAction(image_like, "like", null)
                 .addAction(R.drawable.previous_icon, "previous",pendingIntentPre)
                 .addAction(image_play_pause, "pause", pendingIntentPlay)
                 .addAction(R.drawable.next_icon, "next", pendingIntentNext)
                 .addAction(image_dislike, "dislike", null)
-//              .setStyle(new NotificationCompat.BigPictureStyle()
-//                        .bigPicture(bitmap))
+
                 .setStyle(new androidx.media.app.NotificationCompat.MediaStyle()
                         .setShowActionsInCompactView(1,2,3))
                 .build();
 
-//        NotificationManagerCompat notificationManagerCompat = NotificationManagerCompat.from(this);
+
         startForeground(1, notificationMusic);
     }
 

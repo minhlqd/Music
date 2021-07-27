@@ -5,13 +5,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 
-import com.example.music.interfaces.INotificationService;
 import com.example.music.activity.MainActivity;
 import com.example.music.Key;
 
 public class MusicReceiver extends BroadcastReceiver {
 
-    private INotificationService mNotificationService;
 
 
 //    public MusicReceiver(Context context){
@@ -20,10 +18,6 @@ public class MusicReceiver extends BroadcastReceiver {
     public MusicReceiver() {
     }
 
-    public void getInterface(INotificationService notificationService) {
-        this.mNotificationService = notificationService;
-
-    }
 
     @Override
     public void onReceive(Context context, Intent intent) {

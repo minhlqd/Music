@@ -1,12 +1,11 @@
 <resources>
 
-    <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
-        <!-- Customize your theme here. -->
         <item name="colorPrimary">#FF5722</item>
         <item name="colorPrimaryDark">#9A2A07</item>
         <item name="colorAccent">@color/colorAccent</item>
     </style>
+
     <style name="ActionBar"
         parent="@style/Widget.AppCompat.Light.ActionBar">
         <item name="android:background">#FF5722</item>
@@ -16,9 +15,7 @@
     <style name="ImageButtonPlayer">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
-<!--        <item name="android:background">@drawable/background_play_pause</item>-->
         <item name="backgroundTint">#DAD2D2</item>
-<!--        <item name="backgroundTint">@color/colorPrimary</item>-->
     </style>
 
 </resources>

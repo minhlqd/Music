@@ -85,11 +85,6 @@ public class AllSongOperations {
                 DatabaseHandler.COLUMN_TITLE + "=?";
         String[] whereArgs = new String[]{songsList.getTitle()};
         ContentValues values = new ContentValues();
-//        values.put(DatabaseHandler.COLUMN_TITLE, songsList.getTitle());
-//        values.put(DatabaseHandler.COLUMN_SUBTITLE, songsList.getSubTitle());
-//        values.put(DatabaseHandler.COLUMN_PATH, songsList.getPath());
-//        values.put(DatabaseHandler.COLUMN_IMAGE, songsList.getImage());
-//        values.put(DatabaseHandler.COLUMN_OF_PLAY, songsList.getCountOfPlay());
         values.put(DatabaseHandler.COLUMN_IS_LIKE, songsList.isLike());
 
         Log.d("music_aaa", "updateSong: " + whereClause + Arrays.toString(whereArgs));
@@ -103,7 +98,6 @@ public class AllSongOperations {
         Cursor cursor = sqLiteDatabaseAllSong.query(DatabaseHandler.TABLE_ALL_SONGS, allColumns,
                 null, null, null, null, null);
         ArrayList<SongsList> allSongs = new ArrayList<>();
-        Log.d(TAG, "getAllSong: " + cursor.getCount());
         if (cursor.getCount() > 0) {
             while (cursor.moveToNext()) {
                 SongsList songsList = new SongsList(cursor.getString(cursor.getColumnIndex(DatabaseHandler.COLUMN_TITLE))

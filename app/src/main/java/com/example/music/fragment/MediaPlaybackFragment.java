@@ -95,8 +95,6 @@ public class MediaPlaybackFragment extends ListFragment implements ICallBack {
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-//        mImageMusic = view.findViewById(R.id.linear_play_sheet_all);
-
         mImageMusic = view.findViewById(R.id.image_music);
         mSmallImageMusic = view.findViewById(R.id.iv_music_list);
         mLibaryMusic = view.findViewById(R.id.queue_music);

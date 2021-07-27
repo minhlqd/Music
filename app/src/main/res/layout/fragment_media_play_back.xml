@@ -6,7 +6,6 @@
     android:layout_height="match_parent"
     android:layout_gravity="center">
 
-
     <RelativeLayout
         android:id="@+id/music_detail"
         android:layout_width="match_parent"
@@ -28,16 +27,5 @@
         android:scaleType="fitCenter"
         android:src="@drawable/legends"
         app:layout_constraintTop_toBottomOf="@+id/music_detail"/>
-
-
-    <!--    <LinearLayout-->
-<!--        android:id="@+id/media_play"-->
-<!--        android:orientation="horizontal"-->
-<!--        android:layout_alignParentBottom="true"-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="wrap_content">-->
-<!--        <include layout="@layout/player_layout"-->
-<!--            android:id="@+id/player_sheet"/>-->
-<!--    </LinearLayout>-->
 
 </androidx.constraintlayout.widget.ConstraintLayout>
