@@ -107,7 +107,7 @@ public class MediaPlaybackFragment extends ListFragment implements ICallBack {
             int like = bundle.getInt(Key.CONST_LIKE);
 
             mLibaryMusic.setOnClickListener(v -> {
-                MainActivity.mLinearLayout.setVisibility(View.GONE);
+                MainActivity.mPlayerLayout.setVisibility(View.GONE);
                 getActivity().getSupportFragmentManager().beginTransaction()
                         .replace(R.id.fragment, new AllSongFragment())
                         .commit();

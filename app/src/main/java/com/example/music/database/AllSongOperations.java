@@ -97,6 +97,19 @@ public class AllSongOperations {
 
         close();
     }
+    public void updatePlaySong(ArrayList<SongsList> songsList) {
+        open();
+        String whereClause =
+                DatabaseHandler.COLUMN_TITLE + "=?";
+        for (SongsList song : songsList) {
+            String[] whereArgs = new String[]{song.getTitle()};
+            ContentValues values = new ContentValues();
+            song.setPlay(0);
+            values.put(DatabaseHandler.COLUMN_PLAY, song.getPlay());
+            sqLiteDatabaseAllSong.update(DatabaseHandler.TABLE_ALL_SONGS, values, whereClause, whereArgs);
+        }
+        close();
+    }
 
     public ArrayList<SongsList> getAllSong() {
         open();

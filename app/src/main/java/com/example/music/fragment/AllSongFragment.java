@@ -51,15 +51,12 @@ public class AllSongFragment extends ListFragment implements ICallBack {
 
     boolean mFinalSearchList;
 
-    private LinearLayout mLinearPlaySong;
 
     private ImageView mPlayAllSong;
     private ImageView mMusicImage;
-    private ImageView mPlayPause;
     private TextView mTitle;
     private TextView mSubTitle;
 
-    //private IPlayImage mPlayImage;
     private AllSongOperations mAllSongOperations;
     private FavoritesOperations mFavoritesOperations;
     private boolean mCheckPlay;
@@ -88,12 +85,6 @@ public class AllSongFragment extends ListFragment implements ICallBack {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         mRecyclerView = view.findViewById(R.id.recycler_all_song);
-        mLinearPlaySong = view.findViewById(R.id.linear_play_sheet_all);
-
-        mMusicImage = view.findViewById(R.id.iv_music_list);
-        mTitle = view.findViewById(R.id.tv_music_name);
-        mSubTitle = view.findViewById(R.id.tv_music_subtitle);
-        mPlayPause = view.findViewById(R.id.play_pause_song);
         setContent();
     }
 
@@ -116,74 +107,10 @@ public class AllSongFragment extends ListFragment implements ICallBack {
 
         int positionSong = mCreateDataParse.getPositionSong();
 
-        if (mSongsList.size()>0) {
-            getPlaySong(positionSong);
-        }
-
-        if (mCreateDataParse.isSong()) {
-            mPlayPause.setImageResource(R.drawable.ic_pause_black);
-        } else {
-            mPlayPause.setImageResource(R.drawable.ic_play_black);
-        }
-
-        mCheckPlay = mCreateDataParse.isSong();
-
-        mPlayPause.setOnClickListener(v -> {
-            if (mCheckPlay) {
-                mPlayPause.setImageResource(R.drawable.ic_play_black);
-                MainActivity.mMediaPlayer.pause();
-                mSongsList.get(positionSong).setPlay(0);
-                mAllSongOperations.updateSong(mSongsList.get(positionSong));
-                mSongAdapter.notifyDataSetChanged();
-                mCheckPlay = false;
-            } else {
-                mPlayPause.setImageResource(R.drawable.ic_pause_black);
-                MainActivity.mMediaPlayer.start();
-                MainActivity.playCycle();
-                mSongsList.get(positionSong).setPlay(1);
-                mAllSongOperations.updateSong(mSongsList.get(positionSong));
-                mSongAdapter.notifyDataSetChanged();
-                mCheckPlay = true;
-            }
-            getIntentService(positionSong);
-        });
-
-        if (mCreateDataParse.checkScreen()) {
-            mLinearPlaySong.setVisibility(View.GONE);
-        } else {
-            mLinearPlaySong.setVisibility(View.VISIBLE);
-        }
-        mLinearPlaySong.setOnClickListener(v -> {
-            mCreateDataParse.onDataPassSong(mSongsList.get(positionSong).getTitle(), mSongsList.get(positionSong).getPath(), false);
-            MediaPlaybackFragment mediaPlayFragment = new MediaPlaybackFragment();
-            mediaPlayFragment.setArguments(getBundle(mSongsList.get(positionSong)));
-            if (mCreateDataParse.checkScreen()) {
-                getActivity().getSupportFragmentManager()
-                        .beginTransaction()
-                        .replace(R.id.fragment_media, mediaPlayFragment)
-                        .addToBackStack("fragment")
-                        .commit();
-            } else {
-                getActivity().getSupportFragmentManager()
-                        .beginTransaction()
-                        .replace(R.id.fragment, mediaPlayFragment)
-                        .addToBackStack("fragment")
-                        .commit();
-            }
-            mCreateDataParse.playCheckSong(mCheckPlay);
-            mCreateDataParse.fullSongList(mSongsList, positionSong);
-
-        });
         mFinalSearchList = searchedList;
 
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         mRecyclerView.setAdapter(mSongAdapter);
-    }
-
-    private void getPlaySong(int positionSong) {
-        mMusicImage.setImageResource(mSongsList.get(positionSong).getImage());
-        mTitle.setText(mSongsList.get(positionSong).getTitle());
-        mSubTitle.setText(mSongsList.get(positionSong).getSubTitle());
     }
 
     public SongAdapter onQueryTextChange() {
@@ -216,6 +143,7 @@ public class AllSongFragment extends ListFragment implements ICallBack {
 
     @Override
     public void onClickItem(int position) {
+        mAllSongOperations.updatePlaySong(mSongsList);
         if (!mFinalSearchList) {
             setCountPlay(mSongsList.get(position).getTitle());
         } else {
@@ -253,7 +181,11 @@ public class AllSongFragment extends ListFragment implements ICallBack {
 
                 mAllSongOperations.updateSong(songsList);
 
-                mCreateDataParse.onDataPassSong(mSongsList.get(i).getTitle(), mSongsList.get(i).getPath(),true);
+                mCreateDataParse.onDataPassSong(mSongsList.get(i).getTitle()
+                        , mSongsList.get(i).getPath()
+                        , mSongsList.get(i).getSubTitle()
+                        , mSongsList.get(i).getImage()
+                        ,true);
                 MediaPlaybackFragment mediaPlayFragment = new MediaPlaybackFragment();
                 mediaPlayFragment.setArguments(getBundle(songsList));
                 if (mCreateDataParse.checkScreen()) {
@@ -265,7 +197,7 @@ public class AllSongFragment extends ListFragment implements ICallBack {
                 } else {
                     getActivity().getSupportFragmentManager()
                             .beginTransaction()
-                            .replace(R.id.fragment, mediaPlayFragment)
+                            .replace(R.id.fragment, new AllSongFragment())
                             .addToBackStack("fragment")
                             .commit();
                 }

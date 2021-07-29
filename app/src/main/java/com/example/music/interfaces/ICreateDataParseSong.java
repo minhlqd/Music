@@ -5,7 +5,7 @@ import com.example.music.model.SongsList;
 import java.util.ArrayList;
 
 public interface ICreateDataParseSong {
-    void onDataPassSong(String name, String path, boolean checkSong);
+    void onDataPassSong(String name, String path, String subtitle, int image, boolean checkSong);
 
     void fullSongList(ArrayList<SongsList> songList, int position);
 

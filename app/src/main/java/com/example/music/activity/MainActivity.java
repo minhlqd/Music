@@ -2,6 +2,7 @@ package com.example.music.activity;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.PendingIntent;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
@@ -79,13 +80,20 @@ public class MainActivity extends AppCompatActivity implements
     private ImageButton mBtnDisLike;
     private ImageButton mBtnLike;
     private ImageView mBtnShuffle;
-    
+
+    private TextView mTitle;
+    private TextView mSubtitle;
+    private ImageView mPlayPauseSong;
+    private ImageView mImgSong;
+
+    private LinearLayout mPlayerSheetAll;
+
     public static SeekBar mSeekbarController;
     private DrawerLayout mDrawerLayout;
     public static TextView mCurrentTime;
     private TextView mTotalTime;
 
-    public static LinearLayout mLinearLayout;
+    public static LinearLayout mPlayerLayout;
 
     private ArrayList<SongsList> mSongsList;
     private RecyclerView mRecyclerView;
@@ -108,6 +116,8 @@ public class MainActivity extends AppCompatActivity implements
     private boolean mCheckLikeFlag = false;
     private boolean mCkeckPlay = true;
     private boolean mCheckScreen = false;
+    private boolean mCheckPlayerSheet = false;
+    private boolean mcheckPlayMusic = false;
 
     private Toolbar mToolbar;
 
@@ -130,22 +140,6 @@ public class MainActivity extends AppCompatActivity implements
 
     private Display mDisplay;
 
-    /*private ServiceConnection mServiceConnection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            MediaService.MusicBinder binder = (MediaService.MusicBinder) service;
-            mMediaService = binder.getSerVice();
-            setControls();
-            mIsBinder = true;
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-            mIsBinder = false;
-        }
-    };*/
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -167,11 +161,13 @@ public class MainActivity extends AppCompatActivity implements
         init();
         grantedPermission();
         getMusic();
+        playMusic();
         broadcast();
     }
 
     @SuppressLint("NonConstantResourceId")
     private void init() {
+        mBtnPlayPause = findViewById(R.id.img_btn_play);
         mBtnPrev = findViewById(R.id.img_btn_previous);
         mBtnNext = findViewById(R.id.img_btn_next);
         mBtnReplay = findViewById(R.id.img_btn_replay);
@@ -179,7 +175,7 @@ public class MainActivity extends AppCompatActivity implements
         mBtnLike = findViewById(R.id.img_btn_like);
         mBtnShuffle = findViewById(R.id.img_btn_shuffle);
 
-        mLinearLayout = findViewById(R.id.ll_include_controls);
+        mPlayerLayout = findViewById(R.id.ll_include_controls);
 
         mFragmentAllSong = findViewById(R.id.fragment);
         mFragmentMediaPlay = findViewById(R.id.fragment_media);
@@ -187,15 +183,22 @@ public class MainActivity extends AppCompatActivity implements
         mCurrentTime = findViewById(R.id.tv_current_time);
         mTotalTime = findViewById(R.id.tv_total_time);
 
+        mTitle = findViewById(R.id.tv_music_name);
+        mSubtitle = findViewById(R.id.tv_music_subtitle);
+        mPlayPauseSong = findViewById(R.id.play_pause_song);
+        mImgSong = findViewById(R.id.iv_music_list);
+        mPlayerSheetAll = findViewById(R.id.linear_play_sheet_all);
+
         mSeekbarController = findViewById(R.id.seekbar_controller);
         NavigationView navigationView = findViewById(R.id.nav_view);
         mDrawerLayout = findViewById(R.id.drawer_layout);
-        mBtnPlayPause = findViewById(R.id.img_btn_play);
+
         mToolbar = findViewById(R.id.toolbar);
         mHandler = new Handler();
         mMediaPlayer = new MediaPlayer();
 
-        mToolbar.setTitleTextColor(getResources().getColor(R.color.text_color));
+
+        mToolbar.setTitleTextColor(getResources().getColor(R.color.light_color));
         setSupportActionBar(mToolbar);
 
         ActionBar actionBar = getSupportActionBar();
@@ -223,7 +226,7 @@ public class MainActivity extends AppCompatActivity implements
                     .replace(R.id.fragment_media, new MediaPlaybackFragment())
                     .addToBackStack("Fragment_media")
                     .commit();
-            mLinearLayout.setVisibility(View.VISIBLE);
+            mPlayerLayout.setVisibility(View.VISIBLE);
         } else {
             mCheckScreen = false;
             checkScreen();
@@ -241,7 +244,7 @@ public class MainActivity extends AppCompatActivity implements
                         fragmentManager.beginTransaction();
                 fragmentTransaction.remove(mediaPlaybackFragment).commit();
             }
-            mLinearLayout.setVisibility(View.GONE);
+            mPlayerLayout.setVisibility(View.GONE);
         }
 
         mBtnNext.setOnClickListener(this);
@@ -251,6 +254,9 @@ public class MainActivity extends AppCompatActivity implements
         mBtnLike.setOnClickListener(this);
         mBtnDisLike.setOnClickListener(this);
         mBtnShuffle.setOnClickListener(this);
+        mPlayPauseSong.setOnClickListener(this);
+        mPlayerSheetAll.setOnClickListener(this);
+
 
         navigationView.setNavigationItemSelectedListener(item -> {
             mDrawerLayout.closeDrawers();
@@ -258,7 +264,7 @@ public class MainActivity extends AppCompatActivity implements
                 case R.id.listen_now:{
                     attachMusic(mSongsList.get(mCurrentPosition).getTitle(), mSongsList.get(mCurrentPosition).getPath());
                     musicNextPre(mSongsList, mCurrentPosition);
-                    mLinearLayout.setVisibility(View.VISIBLE);
+                    mPlayerLayout.setVisibility(View.VISIBLE);
                     break;
                 }
                 case R.id.favorite: {
@@ -324,6 +330,8 @@ public class MainActivity extends AppCompatActivity implements
             for (int i = 0; i < mDataSongList.size(); i++) {
                 mAllSongOperations.addAllSong(mDataSongList.get(i));
             }
+        } else {
+            mDataSongList.addAll(mAllSongOperations.getAllSong());
         }
     }
 
@@ -344,6 +352,11 @@ public class MainActivity extends AppCompatActivity implements
         }
     }
 
+    private void playMusic() {
+        mTitle.setText(mDataSongList.get(0).getTitle());
+        mSubtitle.setText(mDataSongList.get(0).getSubTitle());
+        mImgSong.setImageResource(mDataSongList.get(0).getImage());
+    }
 
     private void broadcast() {
         IntentFilter intentFilter = new IntentFilter();
@@ -409,6 +422,53 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
+            case R.id.linear_play_sheet_all:{
+                if (!mcheckPlayMusic) {
+                    mSongsList = mDataSongList;
+                    mCurrentPosition = 0;
+                    mcheckPlayMusic = true;
+                }
+                MediaPlaybackFragment mediaPlayFragment = new MediaPlaybackFragment();
+                mediaPlayFragment.setArguments(getBundle(mSongsList.get(mCurrentPosition)));
+                getSupportFragmentManager().beginTransaction().replace(R.id.fragment, mediaPlayFragment).commit();
+                mMediaPlayer.start();
+                playCycle();
+                mPlayerSheetAll.setVisibility(View.GONE);
+                mPlayerLayout.setVisibility(View.VISIBLE);
+                mCheckPlayerSheet = true;
+
+                break;
+            }
+            case R.id.play_pause_song:{
+                intentService(mCurrentPosition);
+                if (!mcheckPlayMusic) {
+                    attachMusic(mDataSongList.get(0).getTitle(), mDataSongList.get(0).getPath());
+                    Log.d(TAG, "onClick: " + mDataSongList.get(0).getTitle());
+                    mDataSongList.get(0).setPlay(1);
+                    mAllSongOperations.updateSong(mDataSongList.get(0));
+                    mPlayPauseSong.setImageResource(R.drawable.ic_pause_black);
+                    mSongsList = mDataSongList;
+                    mCurrentPosition = 0;
+                    mcheckPlayMusic = true;
+                    getSupportFragmentManager().beginTransaction().replace(R.id.fragment, new AllSongFragment()).addToBackStack("fragment").commit();
+                } else {
+                    if (mMediaPlayer.isPlaying()) {
+                        mMediaPlayer.pause();
+                        mSongsList.get(mCurrentPosition).setPlay(0);
+                        mAllSongOperations.updateSong(mSongsList.get(mCurrentPosition));
+                        mPlayPauseSong.setImageResource(R.drawable.ic_play_black);
+                        getSupportFragmentManager().beginTransaction().replace(R.id.fragment, new AllSongFragment()).commit();
+                    } else if (!mMediaPlayer.isPlaying()) {
+                        mMediaPlayer.start();
+                        mSongsList.get(mCurrentPosition).setPlay(1);
+                        mAllSongOperations.updateSong(mSongsList.get(mCurrentPosition));
+                        mPlayPauseSong.setImageResource(R.drawable.ic_pause_black);
+                        playCycle();
+                        getSupportFragmentManager().beginTransaction().replace(R.id.fragment, new AllSongFragment()).commit();
+                    }
+                }
+                break;
+            }
             case R.id.img_btn_play:
                 intentService(mCurrentPosition);
                 if (mCheckFlag) {
@@ -681,12 +741,22 @@ public class MainActivity extends AppCompatActivity implements
                         .replace(R.id.fragment_media, mediaPlayFragment)
                         .addToBackStack("fragment_media").commit();
             } else {
-                MediaPlaybackFragment mediaPlayFragment = new MediaPlaybackFragment();
-                mediaPlayFragment.setArguments(getBundle(songListNext.get(position)));
-                getSupportFragmentManager()
-                        .beginTransaction()
-                        .replace(R.id.fragment, mediaPlayFragment)
-                        .addToBackStack("fragment").commit();
+                if (mCheckPlayerSheet) {
+                    MediaPlaybackFragment mediaPlayFragment = new MediaPlaybackFragment();
+                    mediaPlayFragment.setArguments(getBundle(songListNext.get(position)));
+                    getSupportFragmentManager()
+                            .beginTransaction()
+                            .replace(R.id.fragment, mediaPlayFragment)
+                            .addToBackStack("fragment").commit();
+                } else {
+                    mTitle.setText(songListNext.get(position).getTitle());
+                    mSubtitle.setText(songListNext.get(position).getSubTitle());
+                    mImgSong.setImageResource(songListNext.get(position).getImage());
+                    getSupportFragmentManager()
+                            .beginTransaction()
+                            .replace(R.id.fragment, new AllSongFragment())
+                            .addToBackStack("fragment").commit();
+                }
             }
             intentService(mCurrentPosition);
         }
@@ -711,9 +781,12 @@ public class MainActivity extends AppCompatActivity implements
             getSupportFragmentManager().popBackStack();
             count--;
         }
-        super.onBackPressed();
+        // super.onBackPressed();
+        getSupportFragmentManager().beginTransaction().replace(R.id.fragment, new AllSongFragment()).commit();
+        mCheckPlayerSheet = false;
         mCkeckPlay = false;
-        mLinearLayout.setVisibility(View.GONE);
+        mPlayerSheetAll.setVisibility(View.VISIBLE);
+        mPlayerLayout.setVisibility(View.GONE);
     }
 
     private Bundle getBundle(SongsList currSong){
@@ -744,7 +817,7 @@ public class MainActivity extends AppCompatActivity implements
         Toast.makeText(this, name, Toast.LENGTH_LONG).show();
         attachMusic(name, path);
         mCkeckPlay = true;
-        mLinearLayout.setVisibility(View.VISIBLE);
+        mPlayerLayout.setVisibility(View.VISIBLE);
     }
 
     @Override
@@ -753,13 +826,17 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void onDataPassSong(String name, String path, boolean checkSong) {
+    public void onDataPassSong(String name, String path, String subtile, int image, boolean checkSong) {
         Toast.makeText(this, name, Toast.LENGTH_LONG).show();
         if (checkSong) {
             attachMusic(name, path);
         }
         mCkeckPlay = true;
-        mLinearLayout.setVisibility(View.VISIBLE);
+        //mPlayerLayout.setVisibility(View.VISIBLE);
+        mTitle.setText(name);
+        mSubtitle.setText(subtile);
+        mImgSong.setImageResource(image);
+        mPlayPauseSong.setImageResource(R.drawable.ic_pause_black);
     }
 
     @Override
@@ -827,11 +904,7 @@ public class MainActivity extends AppCompatActivity implements
         mMediaPlayer.release();
         mHandler.removeCallbacks(mRunnable);
         unregisterReceiver(mReceiver);
-        for (SongsList songsList : mSongsList) {
-            songsList.setPlay(0);
-            Log.d(TAG, "onDestroy: " + songsList.getPlay());
-            mAllSongOperations.updateSong(songsList);
-        }
+        mAllSongOperations.updatePlaySong(mSongsList);
         // stopService(mIntentService);
     }
 

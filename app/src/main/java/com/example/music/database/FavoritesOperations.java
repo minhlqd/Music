@@ -65,6 +65,7 @@ public class FavoritesOperations {
         close();
     }
 
+
     public ArrayList<SongsList> getAllFavorites() {
         open();
         @SuppressLint("Recycle")
