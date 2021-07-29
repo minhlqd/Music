@@ -18,7 +18,7 @@
         android:layout_width="100dp"
         android:layout_height="100dp"
         android:paddingTop="20sp"
-        app:srcCompat="@drawable/ic_music_a"
+        app:srcCompat="@drawable/splash_play_music_192"
         tools:ignore="VectorDrawableCompat" />
     <TextView
         android:layout_width="match_parent"

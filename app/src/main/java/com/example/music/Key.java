@@ -5,6 +5,8 @@ public class Key {
     public static final String TAG = "music";
     public static final String CHANNEL_ID = "MUSIC_PLAYER";
 
+    public static final String PATH_SONG = "path_song";
+
     // BroadCast Action
     public static final String ACTION_PLAY_SONG =
             "com.example.music.ACTION_PLAY_SONG";

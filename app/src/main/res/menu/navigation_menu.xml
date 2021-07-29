@@ -6,7 +6,7 @@
             android:icon="@drawable/ic_music_note"
             android:title="@string/listen_now" />
         <item
-            android:id="@+id/nav_sleep_timer"
+            android:id="@+id/recent"
             android:icon="@drawable/ic_recent"
             android:title="@string/recent" />
         <item
@@ -14,7 +14,7 @@
             android:icon="@drawable/ic_fav_menu"
             android:title="@string/favorite" />
         <item
-            android:id="@+id/nav_rate"
+            android:id="@+id/library"
             android:icon="@drawable/ic_library_music"
             android:title="@string/library" />
     </group>

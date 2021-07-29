@@ -26,6 +26,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.music.interfaces.ICallBack;
 import com.example.music.activity.MainActivity;
 import com.example.music.Key;
+import com.example.music.interfaces.ICreateDataParseMedia;
 import com.example.music.model.SongsList;
 import com.example.music.R;
 
@@ -47,21 +48,10 @@ public class MediaPlaybackFragment extends ListFragment implements ICallBack {
     private ImageView mLibaryMusic;
     private TextView mTitle;
     private TextView mSubTitle;
-
+    private TextView mPosition;
 
     private boolean checkSurface = false;
-
-//    private boolean likeFag = false;
-
-    private createDataParsed createDataParsed;
-
-    public static Fragment getInstance(int position) {
-        Bundle bundle = new Bundle();
-        bundle.putInt(Key.KEY_POSITION, position);
-        MediaPlaybackFragment tabFragment = new MediaPlaybackFragment();
-        tabFragment.setArguments(bundle);
-        return tabFragment;
-    }
+    private ICreateDataParseMedia createDataParsed;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -85,7 +75,7 @@ public class MediaPlaybackFragment extends ListFragment implements ICallBack {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        createDataParsed = (createDataParsed) context;
+        createDataParsed = (ICreateDataParseMedia) context;
     }
 
     @Override
@@ -101,25 +91,30 @@ public class MediaPlaybackFragment extends ListFragment implements ICallBack {
         mTitle = view.findViewById(R.id.tv_music_name);
         mSubTitle = view.findViewById(R.id.tv_music_subtitle);
         mMusicDetail = view.findViewById(R.id.music_detail);
+        mPosition = view.findViewById(R.id.position);
+
+        mSmallImageMusic.setVisibility(View.VISIBLE);
+        mPosition.setVisibility(View.GONE);
 
         Bundle bundle = this.getArguments();
-        assert bundle != null;
-        mImageMusic.setImageResource(bundle.getInt(Key.CONST_IMAGE));;
-        mSmallImageMusic.setImageResource(bundle.getInt(Key.CONST_IMAGE));
+        if (bundle != null) {
+            mImageMusic.setImageResource(bundle.getInt(Key.CONST_IMAGE));
+            mSmallImageMusic.setImageResource(bundle.getInt(Key.CONST_IMAGE));
 
-        mTitle.setText(bundle.getString(Key.CONST_TITLE));
-        mSubTitle.setText(bundle.getString(Key.CONST_SUBTITLE));
+            mTitle.setText(bundle.getString(Key.CONST_TITLE));
+            mSubTitle.setText(bundle.getString(Key.CONST_SUBTITLE));
 
-        int like = bundle.getInt(Key.CONST_LIKE);
+            int like = bundle.getInt(Key.CONST_LIKE);
 
-        mLibaryMusic.setOnClickListener(v -> {
-            MainActivity.mLinearLayout.setVisibility(View.GONE);
-            getActivity().getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.fragment, new AllSongFragment())
-                    .commit();
-        });
+            mLibaryMusic.setOnClickListener(v -> {
+                MainActivity.mLinearLayout.setVisibility(View.GONE);
+                getActivity().getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.fragment, new AllSongFragment())
+                        .commit();
+            });
 
-        createDataParsed.isLike(like);
+            createDataParsed.isLike(like);
+        }
     }
 
     @Override
@@ -137,10 +132,5 @@ public class MediaPlaybackFragment extends ListFragment implements ICallBack {
     public void onLongClickItem(int position) {
 
     }
-
-    public interface createDataParsed {
-        void isLike(int like);
-    }
-
 
 }

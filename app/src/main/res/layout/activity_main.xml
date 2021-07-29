@@ -18,7 +18,11 @@
             android:layout_height="?attr/actionBarSize"
             android:background="#FF5722"
             android:theme="@style/ThemeOverlay.AppCompat.ActionBar" />
-
+        <FrameLayout
+            android:layout_below="@id/toolbar"
+            android:id="@+id/fragment"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
         <LinearLayout
             android:id="@+id/ll_include_controls"
             android:layout_width="410dp"
@@ -26,53 +30,8 @@
             android:layout_alignParentEnd="true"
             android:layout_alignParentBottom="true"
             android:layout_alignParentRight="true">
-
             <include layout="@layout/player_layout" />
-
         </LinearLayout>
-
-<!--        <LinearLayout-->
-<!--            android:id="@+id/ll_tab_layout"-->
-<!--            android:layout_width="match_parent"-->
-<!--            android:layout_height="?attr/actionBarSize"-->
-<!--            android:layout_below="@id/ll_include_controls"-->
-<!--            android:background="@color/colorPrimary">-->
-
-<!--            <android.support.design.widget.TabLayout-->
-<!--                android:id="@+id/tabs"-->
-<!--                android:layout_width="match_parent"-->
-<!--                android:layout_height="wrap_content"-->
-<!--                android:elevation="10dp"-->
-<!--                app:tabBackground="@color/colorPrimary"-->
-<!--                app:tabGravity="fill"-->
-<!--                app:tabIndicatorColor="@color/colorPrimary"-->
-<!--                app:tabMode="fixed"-->
-<!--                app:tabSelectedTextColor="@color/text_color"-->
-<!--                app:tabTextColor="@color/off_color" />-->
-<!--        </LinearLayout>-->
-
-
-<!--        <android.support.v4.view.ViewPager-->
-<!--            android:id="@+id/songs_viewpager"-->
-<!--            android:layout_width="match_parent"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:layout_below="@id/ll_tab_layout"-->
-<!--            app:layout_behavior="@string/appbar_scrolling_view_behavior" />-->
-
-        <FrameLayout
-            android:layout_below="@id/toolbar"
-            android:id="@+id/fragment"
-            android:layout_width="410dp"
-            android:layout_height="match_parent" />
-
-        <FrameLayout
-
-            android:id="@+id/fragment_media"
-            android:layout_width="320dp"
-            android:layout_height="match_parent"
-            android:layout_below="@id/toolbar"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentRight="true" />
 
     </RelativeLayout>
 

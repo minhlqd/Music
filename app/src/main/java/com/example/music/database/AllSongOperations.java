@@ -5,6 +5,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.provider.ContactsContract;
 import android.util.Log;
 
 
@@ -23,10 +24,12 @@ public class AllSongOperations {
             DatabaseHandler.COLUMN_ID,
             DatabaseHandler.COLUMN_TITLE,
             DatabaseHandler.COLUMN_SUBTITLE,
+            DatabaseHandler.COLUMN_DURATION,
             DatabaseHandler.COLUMN_PATH,
             DatabaseHandler.COLUMN_IMAGE,
             DatabaseHandler.COLUMN_OF_PLAY,
-            DatabaseHandler.COLUMN_IS_LIKE
+            DatabaseHandler.COLUMN_IS_LIKE,
+            DatabaseHandler.COLUMN_PLAY
     };
 
     public AllSongOperations(Context context) {
@@ -48,10 +51,12 @@ public class AllSongOperations {
         ContentValues values = new ContentValues();
         values.put(DatabaseHandler.COLUMN_TITLE, songsList.getTitle());
         values.put(DatabaseHandler.COLUMN_SUBTITLE, songsList.getSubTitle());
+        values.put(DatabaseHandler.COLUMN_DURATION, songsList.getDuration());
         values.put(DatabaseHandler.COLUMN_PATH, songsList.getPath());
         values.put(DatabaseHandler.COLUMN_IMAGE, songsList.getImage());
         values.put(DatabaseHandler.COLUMN_OF_PLAY, songsList.getCountOfPlay());
         values.put(DatabaseHandler.COLUMN_IS_LIKE, songsList.isLike());
+        values.put(DatabaseHandler.COLUMN_PLAY, songsList.getPlay());
 
         sqLiteDatabaseAllSong.insertWithOnConflict(
                 DatabaseHandler.TABLE_ALL_SONGS,
@@ -59,8 +64,6 @@ public class AllSongOperations {
                 values,
                 SQLiteDatabase.CONFLICT_REPLACE);
         close();
-
-        Log.d("music_aaa", "addAllSong: " + values);
     }
 
     public void replaceSong(SongsList songsList) {
@@ -68,13 +71,14 @@ public class AllSongOperations {
         ContentValues values = new ContentValues();
         values.put(DatabaseHandler.COLUMN_TITLE, songsList.getTitle());
         values.put(DatabaseHandler.COLUMN_SUBTITLE, songsList.getSubTitle());
+        values.put(DatabaseHandler.COLUMN_DURATION, songsList.getDuration());
         values.put(DatabaseHandler.COLUMN_PATH, songsList.getPath());
         values.put(DatabaseHandler.COLUMN_IMAGE, songsList.getImage());
         values.put(DatabaseHandler.COLUMN_OF_PLAY, songsList.getCountOfPlay());
         values.put(DatabaseHandler.COLUMN_IS_LIKE, songsList.isLike());
+        values.put(DatabaseHandler.COLUMN_PLAY, songsList.getPlay());
         
         sqLiteDatabaseAllSong.replace(DatabaseHandler.TABLE_ALL_SONGS, null, values);
-//        Log.d(TAG, "replaceSong: "+ position);
         
         close();
     }
@@ -86,8 +90,9 @@ public class AllSongOperations {
         String[] whereArgs = new String[]{songsList.getTitle()};
         ContentValues values = new ContentValues();
         values.put(DatabaseHandler.COLUMN_IS_LIKE, songsList.isLike());
+        values.put(DatabaseHandler.COLUMN_OF_PLAY, songsList.getCountOfPlay());
+        values.put(DatabaseHandler.COLUMN_PLAY, songsList.getPlay());
 
-        Log.d("music_aaa", "updateSong: " + whereClause + Arrays.toString(whereArgs));
         sqLiteDatabaseAllSong.update(DatabaseHandler.TABLE_ALL_SONGS, values, whereClause, whereArgs);
 
         close();
@@ -102,10 +107,12 @@ public class AllSongOperations {
             while (cursor.moveToNext()) {
                 SongsList songsList = new SongsList(cursor.getString(cursor.getColumnIndex(DatabaseHandler.COLUMN_TITLE))
                         , cursor.getString(cursor.getColumnIndex(DatabaseHandler.COLUMN_SUBTITLE))
+                        , cursor.getString(cursor.getColumnIndex(DatabaseHandler.COLUMN_DURATION))
                         , cursor.getString(cursor.getColumnIndex(DatabaseHandler.COLUMN_PATH))
                         , cursor.getInt(cursor.getColumnIndex(DatabaseHandler.COLUMN_IMAGE))
                         , cursor.getInt(cursor.getColumnIndex(DatabaseHandler.COLUMN_OF_PLAY))
-                        , cursor.getInt(cursor.getColumnIndex(DatabaseHandler.COLUMN_IS_LIKE)));
+                        , cursor.getInt(cursor.getColumnIndex(DatabaseHandler.COLUMN_IS_LIKE))
+                        , cursor.getInt(cursor.getColumnIndex(DatabaseHandler.COLUMN_PLAY)));
                 allSongs.add(songsList);
             }
         }

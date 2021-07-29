@@ -3,11 +3,16 @@ package com.example.music.service;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.media.Image;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.util.Log;
 
 import androidx.core.app.NotificationCompat;
 
@@ -15,6 +20,10 @@ import com.example.music.activity.MainActivity;
 import com.example.music.broadcast.MusicReceiver;
 import com.example.music.Key;
 import com.example.music.R;
+import com.example.music.database.AllSongOperations;
+import com.example.music.model.SongsList;
+
+import java.util.ArrayList;
 
 import static com.example.music.Key.CHANNEL_ID;
 
@@ -23,6 +32,8 @@ public class MediaService extends Service {
     int image_like;
     int image_dislike;
     int image_play_pause;
+    private AllSongOperations mAllSongOperations;
+    private ArrayList<SongsList> mSongsList;
 
     public MediaService() {
     }
@@ -33,20 +44,36 @@ public class MediaService extends Service {
     }
 
 
+    public class MusicBinder extends Binder {
+        public MediaService getSerVice() {
+            return MediaService.this;
+        }
+    }
+
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        super.attachBaseContext(newBase);
+        mAllSongOperations = new AllSongOperations(newBase);
+
+    }
+
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Bundle bundle = intent.getExtras();
-        if (bundle != null) {
-            String title = bundle.getString("title");
-            String subtitle = bundle.getString("subtitle");
-            int image = bundle.getInt("image");
-            int like = bundle.getInt("like");
-            sendNotification(title, subtitle, like, image);
-        }
+        mSongsList = new ArrayList<>();
+        mSongsList = mAllSongOperations.getAllSong();
+
+        int position = intent.getIntExtra(Key.KEY_POSITION, 0);
+        SongsList songsList = mSongsList.get(position);
+        String title = songsList.getTitle();
+        String subtitle = songsList.getSubTitle();
+        int image = songsList.getImage();
+        int like = songsList.isLike();
+        sendNotification(title, subtitle, like, image, position);
+
         return START_NOT_STICKY;
     }
 
-    private void sendNotification(String title, String subtitle, int like, int image) {
+    private void sendNotification(String title, String subtitle, int like, int image, int position) {
         switch (like) {
             case 0:{
                 image_like = R.drawable.ic_like;
@@ -67,14 +94,11 @@ public class MediaService extends Service {
                 throw new IllegalStateException("Unexpected value: " + like);
         }
 
-        if (!MainActivity.mediaPlayer.isPlaying()) {
+        if (!MainActivity.mMediaPlayer.isPlaying()) {
             image_play_pause = R.drawable.play_icon;
         } else {
             image_play_pause = R.drawable.pause_icon;
         }
-
-
-
         Intent intentNextSong = new Intent(this, MusicReceiver.class)
                 .setAction(Key.ACTION_NEXT_SONG);
         PendingIntent pendingIntentNext =
@@ -82,6 +106,9 @@ public class MediaService extends Service {
 
         Intent intentPlaySong = new Intent(this, MusicReceiver.class)
                 .setAction(Key.ACTION_PLAY_SONG);
+
+        intentPlaySong.putExtra(Key.KEY_POSITION, String.valueOf(position));
+        // sendBroadcast(intentPlaySong);
         PendingIntent pendingIntentPlay =
                 PendingIntent.getBroadcast(this, 1, intentPlaySong, PendingIntent.FLAG_ONE_SHOT);
 
@@ -90,6 +117,9 @@ public class MediaService extends Service {
         PendingIntent pendingIntentPre =
                 PendingIntent.getActivity(this, 1, intentPreSong, PendingIntent.FLAG_ONE_SHOT);
 
+//        Log.d("position", "sendNotification: " + position);
+//        Intent intent = new Intent(this, MusicReceiver.class);
+        // sendBroadcast(intentPlaySong);
 //        Intent intentActivity = new Intent(this, MainActivity.class);
 //        PendingIntent pendingIntentActivity = PendingIntent.getActivity(this, 1, intentActivity, PendingIntent.FLAG_UPDATE_CURRENT);
 
@@ -99,7 +129,7 @@ public class MediaService extends Service {
                 .setSubText("MinhMX")
                 .setContentTitle(title)
                 .setContentText(subtitle)
-                .setSmallIcon(R.drawable.ic_music_a)
+                .setSmallIcon(R.drawable.splash_play_music_192)
                 .setLargeIcon(bitmap)
                 .addAction(image_like, "like", null)
                 .addAction(R.drawable.previous_icon, "previous",pendingIntentPre)
@@ -115,9 +145,11 @@ public class MediaService extends Service {
         startForeground(1, notificationMusic);
     }
 
+
     @Override
     public void onDestroy() {
         super.onDestroy();
 //        stopForeground();
     }
+
 }

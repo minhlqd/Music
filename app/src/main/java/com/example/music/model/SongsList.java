@@ -4,18 +4,38 @@ public class SongsList {
 
     private String title;
     private String subTitle;
+    private String duration;
     private String path;
     private int image;
     private int countOfPlay;
     private int isLike;
+    private int play;
 
-    public SongsList(String title, String subTitle, String path, int image,int countOfPlay, int isLike) {
+    public SongsList(String title, String subTitle, String duration, String path, int image, int countOfPlay, int isLike, int play) {
         this.title = title;
         this.subTitle = subTitle;
+        this.duration = duration;
         this.path = path;
         this.image = image;
         this.countOfPlay = countOfPlay;
         this.isLike = isLike;
+        this.play = play;
+    }
+
+    public int getPlay() {
+        return play;
+    }
+
+    public void setPlay(int play) {
+        this.play = play;
+    }
+
+    public String getDuration() {
+        return duration;
+    }
+
+    public void setDuration(String duration) {
+        this.duration = duration;
     }
 
     public int getCountOfPlay() {

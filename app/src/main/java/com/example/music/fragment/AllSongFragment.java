@@ -24,9 +24,9 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 
+import com.example.music.database.FavoritesOperations;
 import com.example.music.interfaces.ICallBack;
 import com.example.music.interfaces.ICreateDataParseSong;
-import com.example.music.interfaces.IPlayImage;
 import com.example.music.activity.MainActivity;
 import com.example.music.adapter.SongAdapter;
 import com.example.music.database.AllSongOperations;
@@ -48,7 +48,6 @@ public class AllSongFragment extends ListFragment implements ICallBack {
     private RecyclerView mRecyclerView;
 
     private ICreateDataParseSong mCreateDataParse;
-    MainActivity mainActivity;
 
     boolean mFinalSearchList;
 
@@ -60,11 +59,12 @@ public class AllSongFragment extends ListFragment implements ICallBack {
     private TextView mTitle;
     private TextView mSubTitle;
 
-    private IPlayImage mPlayImage;
+    //private IPlayImage mPlayImage;
     private AllSongOperations mAllSongOperations;
-    
+    private FavoritesOperations mFavoritesOperations;
     private boolean mCheckPlay;
 
+    private SongAdapter mSongAdapter;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -77,6 +77,7 @@ public class AllSongFragment extends ListFragment implements ICallBack {
         super.onAttach(context);
         mCreateDataParse = (ICreateDataParseSong) context;
         mAllSongOperations = new AllSongOperations(context);
+        mFavoritesOperations = new FavoritesOperations(context);
     }
 
     @Override
@@ -103,21 +104,21 @@ public class AllSongFragment extends ListFragment implements ICallBack {
 
         mSongsList = mAllSongOperations.getAllSong();
 
-        SongAdapter adapter = new SongAdapter(getContext(), mSongsList, this);
+        mSongAdapter = new SongAdapter(getContext(), mSongsList, this);
         if (!mCreateDataParse.queryText().equals("")) {
-            adapter = onQueryTextChange();
-            adapter.notifyDataSetChanged();
+            mSongAdapter = onQueryTextChange();
+            mSongAdapter.notifyDataSetChanged();
             searchedList = true;
         } else {
             searchedList = false;
         }
         mCreateDataParse.getLength(mSongsList.size());
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        mRecyclerView.setAdapter(adapter);
 
         int positionSong = mCreateDataParse.getPositionSong();
 
-        getPlaySong(positionSong);
+        if (mSongsList.size()>0) {
+            getPlaySong(positionSong);
+        }
 
         if (mCreateDataParse.isSong()) {
             mPlayPause.setImageResource(R.drawable.ic_pause_black);
@@ -130,28 +131,53 @@ public class AllSongFragment extends ListFragment implements ICallBack {
         mPlayPause.setOnClickListener(v -> {
             if (mCheckPlay) {
                 mPlayPause.setImageResource(R.drawable.ic_play_black);
-                MainActivity.mediaPlayer.pause();
+                MainActivity.mMediaPlayer.pause();
+                mSongsList.get(positionSong).setPlay(0);
+                mAllSongOperations.updateSong(mSongsList.get(positionSong));
+                mSongAdapter.notifyDataSetChanged();
                 mCheckPlay = false;
             } else {
                 mPlayPause.setImageResource(R.drawable.ic_pause_black);
-                MainActivity.mediaPlayer.start();
+                MainActivity.mMediaPlayer.start();
                 MainActivity.playCycle();
+                mSongsList.get(positionSong).setPlay(1);
+                mAllSongOperations.updateSong(mSongsList.get(positionSong));
+                mSongAdapter.notifyDataSetChanged();
                 mCheckPlay = true;
             }
-            getIntentService(mSongsList.get(positionSong));
+            getIntentService(positionSong);
         });
 
+        if (mCreateDataParse.checkScreen()) {
+            mLinearPlaySong.setVisibility(View.GONE);
+        } else {
+            mLinearPlaySong.setVisibility(View.VISIBLE);
+        }
         mLinearPlaySong.setOnClickListener(v -> {
             mCreateDataParse.onDataPassSong(mSongsList.get(positionSong).getTitle(), mSongsList.get(positionSong).getPath(), false);
             MediaPlaybackFragment mediaPlayFragment = new MediaPlaybackFragment();
             mediaPlayFragment.setArguments(getBundle(mSongsList.get(positionSong)));
-            getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.fragment, mediaPlayFragment).addToBackStack("fragment").commit();
-
+            if (mCreateDataParse.checkScreen()) {
+                getActivity().getSupportFragmentManager()
+                        .beginTransaction()
+                        .replace(R.id.fragment_media, mediaPlayFragment)
+                        .addToBackStack("fragment")
+                        .commit();
+            } else {
+                getActivity().getSupportFragmentManager()
+                        .beginTransaction()
+                        .replace(R.id.fragment, mediaPlayFragment)
+                        .addToBackStack("fragment")
+                        .commit();
+            }
             mCreateDataParse.playCheckSong(mCheckPlay);
             mCreateDataParse.fullSongList(mSongsList, positionSong);
 
         });
         mFinalSearchList = searchedList;
+
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        mRecyclerView.setAdapter(mSongAdapter);
     }
 
     private void getPlaySong(int positionSong) {
@@ -191,17 +217,10 @@ public class AllSongFragment extends ListFragment implements ICallBack {
     @Override
     public void onClickItem(int position) {
         if (!mFinalSearchList) {
-            mCreateDataParse.onDataPassSong(mSongsList.get(position).getTitle(), mSongsList.get(position).getPath(),true);
-
+            setCountPlay(mSongsList.get(position).getTitle());
         } else {
-            mCreateDataParse.onDataPassSong(mSearchList.get(position).getTitle(), mSearchList.get(position).getPath(),true);
+            setCountPlay(mSearchList.get(position).getTitle());
         }
-        MediaPlaybackFragment mediaPlayFragment = new MediaPlaybackFragment();
-        mediaPlayFragment.setArguments(getBundle(mSongsList.get(position)));
-        getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.fragment, mediaPlayFragment).addToBackStack("fragment").commit();
-        getIntentService(mSongsList.get(position));
-
-        mCreateDataParse.fullSongList(mSongsList, position);
     }
 
     private Bundle getBundle(SongsList currSong) {
@@ -213,16 +232,56 @@ public class AllSongFragment extends ListFragment implements ICallBack {
         return bundleMedia;
     }
 
-    private void getIntentService(SongsList currSong) {
+    private void getIntentService(int postion) {
         Intent intent = new Intent(getContext(), MediaService.class);
-        intent.putExtras(getBundle(currSong));
+        intent.putExtra(Key.KEY_POSITION,postion);
         getActivity().startService(intent);
+    }
+
+    private void setCountPlay(String title) {
+        for (int i = 0; i<mSongsList.size(); i ++){
+            if (mSongsList.get(i).getTitle().equals(title)) {
+                SongsList songsList = mSongsList.get(i);
+                songsList.setCountOfPlay(songsList.getCountOfPlay() + 1);
+                if (songsList.getCountOfPlay() == 3) {
+                    songsList.setLike(1);
+                    if (! mFavoritesOperations.checkFavorites(songsList.getTitle())) {
+                        mFavoritesOperations.addSongFav(songsList);
+                    }
+                }
+                songsList.setPlay(1);
+
+                mAllSongOperations.updateSong(songsList);
+
+                mCreateDataParse.onDataPassSong(mSongsList.get(i).getTitle(), mSongsList.get(i).getPath(),true);
+                MediaPlaybackFragment mediaPlayFragment = new MediaPlaybackFragment();
+                mediaPlayFragment.setArguments(getBundle(songsList));
+                if (mCreateDataParse.checkScreen()) {
+                    getActivity().getSupportFragmentManager()
+                            .beginTransaction()
+                            .replace(R.id.fragment_media, mediaPlayFragment)
+                            .addToBackStack("fragment")
+                            .commit();
+                } else {
+                    getActivity().getSupportFragmentManager()
+                            .beginTransaction()
+                            .replace(R.id.fragment, mediaPlayFragment)
+                            .addToBackStack("fragment")
+                            .commit();
+                }
+
+                getIntentService(i);
+                mCreateDataParse.fullSongList(mSongsList, i);
+                break;
+            }
+        }
     }
 
     @Override
     public void onLongClickItem(int position) {
         showDialog(position);
     }
+
 
     @Override
     public void onStop() {

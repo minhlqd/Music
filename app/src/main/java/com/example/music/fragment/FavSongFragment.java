@@ -2,6 +2,7 @@ package com.example.music.fragment;
 
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -19,6 +20,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 
+import com.example.music.database.AllSongOperations;
 import com.example.music.interfaces.ICallBack;
 import com.example.music.interfaces.ICreateDataParseFav;
 import com.example.music.adapter.SongAdapter;
@@ -26,16 +28,21 @@ import com.example.music.database.FavoritesOperations;
 import com.example.music.Key;
 import com.example.music.model.SongsList;
 import com.example.music.R;
+import com.example.music.service.MediaService;
+
 import java.util.ArrayList;
 
 @SuppressWarnings("ALL")
 public class FavSongFragment extends ListFragment implements ICallBack {
 
     private FavoritesOperations mFavoritesOperations;
+    private AllSongOperations mAllSongOperations;
 
 
-    public ArrayList<SongsList> mFavSong;
-    public ArrayList<SongsList> mSearchList;
+    private ArrayList<SongsList> mFavSong;
+    private ArrayList<SongsList> mSearchList;
+    private ArrayList<SongsList> mSongList;
+
 
     private RecyclerView mRecyclerView;
 
@@ -62,6 +69,7 @@ public class FavSongFragment extends ListFragment implements ICallBack {
         super.onAttach(context);
         mCreateDataParsed = (ICreateDataParseFav) context;
         mFavoritesOperations = new FavoritesOperations(context);
+        mAllSongOperations = new AllSongOperations(context);
     }
 
     @Override
@@ -80,7 +88,6 @@ public class FavSongFragment extends ListFragment implements ICallBack {
         mFavSong = new ArrayList<>();
         mSearchList = new ArrayList<>();
         mFavSong = mFavoritesOperations.getAllFavorites();
-        Log.d("aaa", "setContent: " + mFavSong.size());
         mFavAdapter = new SongAdapter(getContext(), mFavSong, this);
         if (!mCreateDataParsed.queryText().equals("")) {
             mFavAdapter = onQueryTextChange();
@@ -101,18 +108,10 @@ public class FavSongFragment extends ListFragment implements ICallBack {
     @Override
     public void onClickItem(int position) {
         if (!mFinalSearchList) {
-            mCreateDataParsed.onDataPass(mFavSong.get(position).getTitle(), mFavSong.get(position).getPath());
+            setCountPlay(mFavSong.get(position).getTitle());
         } else {
-            mCreateDataParsed.onDataPass(mSearchList.get(position).getTitle(), mSearchList.get(position).getPath());
+            setCountPlay(mSearchList.get(position).getTitle());
         }
-        Bundle bundleMedia = new Bundle();
-        bundleMedia.putInt("image", mFavSong.get(position).getImage());
-        bundleMedia.putInt("like", mFavSong.get(position).isLike());
-        MediaPlaybackFragment mediaPlayFragment = new MediaPlaybackFragment();
-        mediaPlayFragment.setArguments(bundleMedia);
-        getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.fragment, mediaPlayFragment).addToBackStack("fragment").commit();
-
-        mCreateDataParsed.fullSongList(mFavSong, position);
     }
 
     @Override
@@ -141,6 +140,7 @@ public class FavSongFragment extends ListFragment implements ICallBack {
                 .setPositiveButton(R.string.yes, (dialog, which) -> {
                     mFavoritesOperations.removeSong(index);
                     mCreateDataParsed.fullSongList(mFavSong, position);
+                    removeLike(index);
                     setContent();
                 });
         AlertDialog alertDialog = builder.create();
@@ -155,10 +155,72 @@ public class FavSongFragment extends ListFragment implements ICallBack {
 
         @Override
         public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
+            removeLike(mFavSong.get(viewHolder.getAdapterPosition()).getTitle());
             mFavoritesOperations.removeSong(mFavSong.get(viewHolder.getAdapterPosition()).getTitle());
             mFavSong.remove(viewHolder.getAdapterPosition());
             mFavAdapter.notifyDataSetChanged();
         }
     };
 
+    private void setCountPlay(String title) {
+        for (int i = 0; i<mFavSong.size(); i ++){
+            if (mFavSong.get(i).getTitle().equals(title)) {
+                SongsList songsList = mFavSong.get(i);
+                songsList.setCountOfPlay(songsList.getCountOfPlay() + 1);
+                if (songsList.getCountOfPlay() == 3) {
+                    songsList.setLike(1);
+                    mFavoritesOperations.addSongFav(songsList);
+                }
+                mAllSongOperations.updateSong(songsList);
+
+                mCreateDataParsed.onDataPass(mFavSong.get(i).getTitle(), mFavSong.get(i).getPath());
+                MediaPlaybackFragment mediaPlayFragment = new MediaPlaybackFragment();
+                mediaPlayFragment.setArguments(getBundle(songsList));
+                if (mCreateDataParsed.checkScreen()) {
+                    getActivity().getSupportFragmentManager()
+                            .beginTransaction()
+                            .replace(R.id.fragment_media, mediaPlayFragment)
+                            .addToBackStack("fragment_media")
+                            .commit();
+                } else {
+                    getActivity().getSupportFragmentManager()
+                            .beginTransaction()
+                            .replace(R.id.fragment, mediaPlayFragment)
+                            .addToBackStack("fragment")
+                            .commit();
+                }
+
+                getIntentService(i);
+                mCreateDataParsed.fullSongList(mFavSong, i);
+                break;
+            }
+        }
+    }
+    private Bundle getBundle(SongsList currSong) {
+        Bundle bundleMedia = new Bundle();
+        bundleMedia.putInt(Key.CONST_IMAGE, currSong.getImage());
+        bundleMedia.putInt(Key.CONST_LIKE, currSong.isLike());
+        bundleMedia.putString(Key.CONST_TITLE, currSong.getTitle());
+        bundleMedia.putString(Key.CONST_SUBTITLE, currSong.getSubTitle());
+        return bundleMedia;
+    }
+
+    private void getIntentService(int postion) {
+        Intent intent = new Intent(getContext(), MediaService.class);
+        intent.putExtra(Key.KEY_POSITION,postion);
+        getActivity().startService(intent);
+    }
+
+    private void removeLike(String title) {
+        mSongList = new ArrayList<>();
+        mSongList = mAllSongOperations.getAllSong();
+        for (SongsList songsList : mSongList) {
+            if (songsList.getTitle().equals(title)) {
+                songsList.setLike(0);
+                songsList.setCountOfPlay(0);
+                mAllSongOperations.updateSong(songsList);
+                break;
+            }
+        }
+    }
 }

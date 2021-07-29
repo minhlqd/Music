@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:padding="10dp"
-    android:background="@drawable/background_play_all_song">
+    android:background="#DAD2D2">
 
     <ImageView
         android:adjustViewBounds="true"

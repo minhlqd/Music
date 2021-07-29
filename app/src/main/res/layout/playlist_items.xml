@@ -4,28 +4,49 @@
     android:layout_height="wrap_content"
     android:padding="10dp">
 
-    <ImageView
-        android:id="@+id/iv_music_list"
+    <RelativeLayout
+        android:id="@+id/relative"
         android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:scaleType="fitCenter"
-        android:adjustViewBounds="true"
-        android:padding="5dp"
-        android:src="@drawable/ic_music_player" />
+        android:layout_height="40dp">
+        <ImageView
+            android:id="@+id/iv_music_list"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:scaleType="fitCenter"
+            android:adjustViewBounds="true"
+            android:padding="5dp"
+            android:visibility="gone"
+            android:src="@drawable/ic_music_player"
+            />
+        <TextView
+            android:id="@+id/position"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:textStyle="bold"
+            android:textColor="#000000"
+            android:text="@string/_1"
+            android:gravity="center"
+            android:padding="5dp"/>
+
+    </RelativeLayout>
 
     <TextView
         android:id="@+id/tv_music_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="10dp"
-        android:layout_toEndOf="@id/iv_music_list"
+        android:layout_marginLeft="10dp"
+        android:layout_marginEnd="34dp"
+        android:layout_marginRight="34dp"
+        android:layout_toStartOf="@+id/queue_music"
+        android:layout_toLeftOf="@+id/queue_music"
+        android:layout_toEndOf="@id/relative"
+        android:layout_toRightOf="@id/relative"
         android:singleLine="true"
         android:text="@string/title"
         android:textColor="@color/color_black"
         android:textSize="16sp"
-        android:textStyle="bold"
-        android:layout_marginLeft="10dp"
-        android:layout_toRightOf="@id/iv_music_list" />
+        android:textStyle="bold" />
 
     <TextView
         android:id="@+id/tv_music_subtitle"
@@ -33,14 +54,14 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/tv_music_name"
         android:layout_marginStart="10dp"
-        android:layout_toEndOf="@id/iv_music_list"
+        android:layout_toEndOf="@id/relative"
         android:singleLine="true"
         android:text="@string/subtitle"
         android:textColor="@color/gray_color"
         android:textSize="12sp"
         android:textStyle="normal"
         android:layout_marginLeft="10dp"
-        android:layout_toRightOf="@id/iv_music_list" />
+        android:layout_toRightOf="@id/relative" />
 
     <ImageView
         android:id="@+id/more_vert"

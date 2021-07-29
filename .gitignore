@@ -1,0 +1,7 @@
+ActivityMusic/app/build
+ActivityMusic/.idea/
+# Gradle files
+ActivityMusic/.gradle/
+.gradle
+.idea
+

@@ -10,7 +10,6 @@ public interface ICreateDataParseFav {
 
     void fullSongList(ArrayList<SongsList> songList, int position);
 
-//    int getPosition();
-
     String queryText();
+    boolean checkScreen();
 }

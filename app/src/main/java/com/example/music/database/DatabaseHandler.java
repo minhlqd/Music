@@ -14,20 +14,34 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     public static final String COLUMN_ID = "songID";
     public static final String COLUMN_TITLE = "title";
     public static final String COLUMN_SUBTITLE = "subtitle";
+    public static final String COLUMN_DURATION = "duration";
     public static final String COLUMN_PATH = "songpath";
     public static final String COLUMN_IMAGE = "image";
     public static final String COLUMN_OF_PLAY = "count";
     public static final String COLUMN_IS_LIKE = "isLike";
+    public static final String COLUMN_PLAY = "play";
 
-    private static final String TABLE_CREATE = "CREATE TABLE " + TABLE_SONGS + " (" + COLUMN_ID
-            + " INTEGER, " + COLUMN_TITLE + " TEXT, " + COLUMN_SUBTITLE
-            + " TEXT, " + COLUMN_PATH + " TEXT PRIMARY KEY, "
-            + COLUMN_IMAGE + " INTEGER, " + COLUMN_OF_PLAY + " INTEGER, "+ COLUMN_IS_LIKE + " INTEGER " + ")";
+    private static final String TABLE_CREATE = "CREATE TABLE " + TABLE_SONGS + " ("
+            + COLUMN_ID + " INTEGER, "
+            + COLUMN_TITLE + " TEXT, "
+            + COLUMN_SUBTITLE + " TEXT, "
+            + COLUMN_DURATION + " TEXT, "
+            + COLUMN_PATH + " TEXT PRIMARY KEY, "
+            + COLUMN_IMAGE + " INTEGER, "
+            + COLUMN_OF_PLAY + " INTEGER, "
+            + COLUMN_IS_LIKE + " INTEGER, "
+            + COLUMN_PLAY + " INTEGER " + ")";
 
-    private static final String TABLE_All_SONG_CREATE = "CREATE TABLE " + TABLE_ALL_SONGS + " (" + COLUMN_ID
-            + " INTEGER, " + COLUMN_TITLE + " TEXT, " + COLUMN_SUBTITLE
-            + " TEXT, " + COLUMN_PATH + " TEXT PRIMARY KEY, "
-            + COLUMN_IMAGE + " INTEGER, " + COLUMN_OF_PLAY + " INTEGER, "+ COLUMN_IS_LIKE + " INTEGER " + ")";
+    private static final String TABLE_All_SONG_CREATE = "CREATE TABLE " + TABLE_ALL_SONGS + " ("
+            + COLUMN_ID + " INTEGER, "
+            + COLUMN_TITLE + " TEXT, "
+            + COLUMN_SUBTITLE + " TEXT, "
+            + COLUMN_DURATION + " TEXT, "
+            + COLUMN_PATH + " TEXT PRIMARY KEY, "
+            + COLUMN_IMAGE + " INTEGER, "
+            + COLUMN_OF_PLAY + " INTEGER, "
+            + COLUMN_IS_LIKE + " INTEGER, "
+            + COLUMN_PLAY + " INTEGER " + ")";
 
 
     public DatabaseHandler(Context context) {
