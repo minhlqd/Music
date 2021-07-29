@@ -1,7 +1,9 @@
 package com.example.music.fragment;
 
 
+import android.content.ContentUris;
 import android.content.Context;
+import android.net.Uri;
 import android.os.Bundle;
 ;
 
@@ -23,6 +25,7 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.ListFragment;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.example.music.interfaces.ICallBack;
 import com.example.music.activity.MainActivity;
 import com.example.music.Key;
@@ -103,9 +106,10 @@ public class MediaPlaybackFragment extends ListFragment implements ICallBack {
 
             mTitle.setText(bundle.getString(Key.CONST_TITLE));
             mSubTitle.setText(bundle.getString(Key.CONST_SUBTITLE));
+            displayInto(getContext(), mImageMusic, bundle.getLong(Key.CONST_IMAGE));
+            displayInto(getContext(), mSmallImageMusic, bundle.getLong(Key.CONST_IMAGE));
 
             int like = bundle.getInt(Key.CONST_LIKE);
-
             mLibaryMusic.setOnClickListener(v -> {
                 MainActivity.mPlayerLayout.setVisibility(View.GONE);
                 getActivity().getSupportFragmentManager().beginTransaction()
@@ -117,6 +121,17 @@ public class MediaPlaybackFragment extends ListFragment implements ICallBack {
         }
     }
 
+    private Uri queryAlbumUri(long id) {
+        final Uri artworkUri = Uri.parse("content://media/external/audio/albumart");
+        return ContentUris.withAppendedId(artworkUri,id);
+    }
+
+    private void displayInto(Context context, ImageView view, Long image){
+        Glide.with(context)
+                .load(queryAlbumUri(image))
+                .placeholder(R.drawable.ic_music)
+                .into(view);
+    }
     @Override
     public void onStop() {
         super.onStop();

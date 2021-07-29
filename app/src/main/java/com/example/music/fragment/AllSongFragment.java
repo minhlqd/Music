@@ -153,7 +153,7 @@ public class AllSongFragment extends ListFragment implements ICallBack {
 
     private Bundle getBundle(SongsList currSong) {
         Bundle bundleMedia = new Bundle();
-        bundleMedia.putString(Key.CONST_IMAGE, currSong.getImage());
+        bundleMedia.putLong(Key.CONST_IMAGE, currSong.getImage());
         bundleMedia.putInt(Key.CONST_LIKE, currSong.isLike());
         bundleMedia.putString(Key.CONST_TITLE, currSong.getTitle());
         bundleMedia.putString(Key.CONST_SUBTITLE, currSong.getSubTitle());
@@ -194,13 +194,10 @@ public class AllSongFragment extends ListFragment implements ICallBack {
                             .replace(R.id.fragment_media, mediaPlayFragment)
                             .addToBackStack("fragment")
                             .commit();
-                } else {
-                    getActivity().getSupportFragmentManager()
-                            .beginTransaction()
-                            .replace(R.id.fragment, new AllSongFragment())
-                            .addToBackStack("fragment")
-                            .commit();
                 }
+
+                mSongAdapter.notifyDataSetChanged();
+                mRecyclerView.setAdapter(mSongAdapter);
 
                 getIntentService(i);
                 mCreateDataParse.fullSongList(mSongsList, i);

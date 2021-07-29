@@ -66,14 +66,14 @@ public class MediaService extends Service {
         SongsList songsList = mSongsList.get(position);
         String title = songsList.getTitle();
         String subtitle = songsList.getSubTitle();
-        String image = songsList.getImage();
+        long image = songsList.getImage();
         int like = songsList.isLike();
         sendNotification(title, subtitle, like, image, position);
 
         return START_NOT_STICKY;
     }
 
-    private void sendNotification(String title, String subtitle, int like, String image, int position) {
+    private void sendNotification(String title, String subtitle, int like, long image, int position) {
         switch (like) {
             case 0:{
                 image_like = R.drawable.ic_like;

@@ -325,7 +325,7 @@ public class MainActivity extends AppCompatActivity implements
                             , cursor.getString(songSubTitle)
                             , getTimeFormatted(Long.parseLong(cursor.getString(duration)))
                             , cursor.getString(path)
-                            , cursor.getString(id)
+                            , cursor.getLong(id)
                             , 0
                             , 0
                             , 0));
@@ -795,7 +795,7 @@ public class MainActivity extends AppCompatActivity implements
 
     private Bundle getBundle(SongsList currSong){
         Bundle bundle = new Bundle();
-        bundle.putString(Key.CONST_IMAGE, currSong.getImage());
+        bundle.putLong(Key.CONST_IMAGE, currSong.getImage());
         bundle.putInt(Key.CONST_LIKE, currSong.isLike());
         bundle.putString(Key.CONST_TITLE, currSong.getTitle());
         bundle.putString(Key.CONST_SUBTITLE, currSong.getSubTitle());
@@ -830,7 +830,7 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void onDataPassSong(String name, String path, String subtile, String image, boolean checkSong) {
+    public void onDataPassSong(String name, String path, String subtile, Long image, boolean checkSong) {
         Toast.makeText(this, name, Toast.LENGTH_LONG).show();
         if (checkSong) {
             attachMusic(name, path);
@@ -844,15 +844,14 @@ public class MainActivity extends AppCompatActivity implements
         mPlayPauseSong.setImageResource(R.drawable.ic_pause_black);
     }
 
-    public Uri queryAlbumUri(long id) {
+    private Uri queryAlbumUri(long id) {
         final Uri artworkUri = Uri.parse("content://media/external/audio/albumart");
-        Log.d(TAG, "queryAlbumUri: " + ContentUris.withAppendedId(artworkUri,id));
         return ContentUris.withAppendedId(artworkUri,id);
     }
 
-    public void displayInto(Context context, ImageView view, String image){
+    private void displayInto(Context context, ImageView view, Long image){
         Glide.with(context)
-                .load(queryAlbumUri(Long.parseLong(image)))
+                .load(queryAlbumUri(image))
                 .placeholder(R.drawable.ic_music)
                 .into(view);
     }
