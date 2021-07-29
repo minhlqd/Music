@@ -4,6 +4,7 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.PendingIntent;
 import android.app.SearchManager;
+import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -43,6 +44,7 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.example.music.Key;
 import com.example.music.R;
 import com.example.music.broadcast.MusicReceiver;
@@ -314,14 +316,16 @@ public class MainActivity extends AppCompatActivity implements
                 int songTitle = cursor.getColumnIndex(MediaStore.Audio.Media.TITLE);
                 int songSubTitle = cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST);
                 int path = cursor.getColumnIndex(MediaStore.Audio.Media.DATA);
-                int image = cursor.getColumnIndex(MediaStore.Audio.Albums.ALBUM_ART);
+                // int image = cursor.getColumnIndex(MediaStore.Audio.Albums.ALBUM_ART);
                 int duration = cursor.getColumnIndex(MediaStore.Audio.Media.DURATION);
+                int id = cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID);
                 while (cursor.moveToNext()) {
+                    Log.d(TAG, "getMusic: " + cursor.getString(id));
                     mDataSongList.add(new SongsList(cursor.getString(songTitle)
                             , cursor.getString(songSubTitle)
                             , getTimeFormatted(Long.parseLong(cursor.getString(duration)))
                             , cursor.getString(path)
-                            , R.drawable.ic_music_player
+                            , cursor.getString(id)
                             , 0
                             , 0
                             , 0));
@@ -355,7 +359,7 @@ public class MainActivity extends AppCompatActivity implements
     private void playMusic() {
         mTitle.setText(mDataSongList.get(0).getTitle());
         mSubtitle.setText(mDataSongList.get(0).getSubTitle());
-        mImgSong.setImageResource(mDataSongList.get(0).getImage());
+        //mImgSong.setImageResource(mDataSongList.get(0).getImage());
     }
 
     private void broadcast() {
@@ -751,7 +755,7 @@ public class MainActivity extends AppCompatActivity implements
                 } else {
                     mTitle.setText(songListNext.get(position).getTitle());
                     mSubtitle.setText(songListNext.get(position).getSubTitle());
-                    mImgSong.setImageResource(songListNext.get(position).getImage());
+                    // mImgSong.setImageResource(songListNext.get(position).getImage());
                     getSupportFragmentManager()
                             .beginTransaction()
                             .replace(R.id.fragment, new AllSongFragment())
@@ -791,7 +795,7 @@ public class MainActivity extends AppCompatActivity implements
 
     private Bundle getBundle(SongsList currSong){
         Bundle bundle = new Bundle();
-        bundle.putInt(Key.CONST_IMAGE, currSong.getImage());
+        bundle.putString(Key.CONST_IMAGE, currSong.getImage());
         bundle.putInt(Key.CONST_LIKE, currSong.isLike());
         bundle.putString(Key.CONST_TITLE, currSong.getTitle());
         bundle.putString(Key.CONST_SUBTITLE, currSong.getSubTitle());
@@ -826,7 +830,7 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void onDataPassSong(String name, String path, String subtile, int image, boolean checkSong) {
+    public void onDataPassSong(String name, String path, String subtile, String image, boolean checkSong) {
         Toast.makeText(this, name, Toast.LENGTH_LONG).show();
         if (checkSong) {
             attachMusic(name, path);
@@ -835,10 +839,23 @@ public class MainActivity extends AppCompatActivity implements
         //mPlayerLayout.setVisibility(View.VISIBLE);
         mTitle.setText(name);
         mSubtitle.setText(subtile);
-        mImgSong.setImageResource(image);
+        displayInto(this, mImgSong, image);
+        // mImgSong.setImageResource(image);
         mPlayPauseSong.setImageResource(R.drawable.ic_pause_black);
     }
 
+    public Uri queryAlbumUri(long id) {
+        final Uri artworkUri = Uri.parse("content://media/external/audio/albumart");
+        Log.d(TAG, "queryAlbumUri: " + ContentUris.withAppendedId(artworkUri,id));
+        return ContentUris.withAppendedId(artworkUri,id);
+    }
+
+    public void displayInto(Context context, ImageView view, String image){
+        Glide.with(context)
+                .load(queryAlbumUri(Long.parseLong(image)))
+                .placeholder(R.drawable.ic_music)
+                .into(view);
+    }
     @Override
     public void fullSongList(ArrayList<SongsList> songList, int position) {
         this.mSongsList = songList;

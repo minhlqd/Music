@@ -6,12 +6,12 @@ public class SongsList {
     private String subTitle;
     private String duration;
     private String path;
-    private int image;
+    private String image;
     private int countOfPlay;
     private int isLike;
     private int play;
 
-    public SongsList(String title, String subTitle, String duration, String path, int image, int countOfPlay, int isLike, int play) {
+    public SongsList(String title, String subTitle, String duration, String path, String image, int countOfPlay, int isLike, int play) {
         this.title = title;
         this.subTitle = subTitle;
         this.duration = duration;
@@ -78,11 +78,11 @@ public class SongsList {
         return subTitle;
     }
 
-    public int getImage() {
+    public String getImage() {
         return image;
     }
 
-    public void setImage(int image) {
+    public void setImage(String image) {
         this.image = image;
     }
 }

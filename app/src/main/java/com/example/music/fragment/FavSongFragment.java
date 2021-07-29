@@ -198,7 +198,7 @@ public class FavSongFragment extends ListFragment implements ICallBack {
     }
     private Bundle getBundle(SongsList currSong) {
         Bundle bundleMedia = new Bundle();
-        bundleMedia.putInt(Key.CONST_IMAGE, currSong.getImage());
+        bundleMedia.putString(Key.CONST_IMAGE, currSong.getImage());
         bundleMedia.putInt(Key.CONST_LIKE, currSong.isLike());
         bundleMedia.putString(Key.CONST_TITLE, currSong.getTitle());
         bundleMedia.putString(Key.CONST_SUBTITLE, currSong.getSubTitle());

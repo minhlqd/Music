@@ -98,8 +98,8 @@ public class MediaPlaybackFragment extends ListFragment implements ICallBack {
 
         Bundle bundle = this.getArguments();
         if (bundle != null) {
-            mImageMusic.setImageResource(bundle.getInt(Key.CONST_IMAGE));
-            mSmallImageMusic.setImageResource(bundle.getInt(Key.CONST_IMAGE));
+            //mImageMusic.setImageResource(bundle.getInt(Key.CONST_IMAGE));
+            //mSmallImageMusic.setImageResource(bundle.getInt(Key.CONST_IMAGE));
 
             mTitle.setText(bundle.getString(Key.CONST_TITLE));
             mSubTitle.setText(bundle.getString(Key.CONST_SUBTITLE));

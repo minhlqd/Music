@@ -66,14 +66,14 @@ public class MediaService extends Service {
         SongsList songsList = mSongsList.get(position);
         String title = songsList.getTitle();
         String subtitle = songsList.getSubTitle();
-        int image = songsList.getImage();
+        String image = songsList.getImage();
         int like = songsList.isLike();
         sendNotification(title, subtitle, like, image, position);
 
         return START_NOT_STICKY;
     }
 
-    private void sendNotification(String title, String subtitle, int like, int image, int position) {
+    private void sendNotification(String title, String subtitle, int like, String image, int position) {
         switch (like) {
             case 0:{
                 image_like = R.drawable.ic_like;
@@ -123,7 +123,8 @@ public class MediaService extends Service {
 //        Intent intentActivity = new Intent(this, MainActivity.class);
 //        PendingIntent pendingIntentActivity = PendingIntent.getActivity(this, 1, intentActivity, PendingIntent.FLAG_UPDATE_CURRENT);
 
-        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), image);
+        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.ic_music_player);
+
         Notification notificationMusic = new NotificationCompat.Builder(this, CHANNEL_ID)
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                 .setSubText("MinhMX")

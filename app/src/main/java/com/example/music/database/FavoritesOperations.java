@@ -78,7 +78,7 @@ public class FavoritesOperations {
                         , cursor.getString(cursor.getColumnIndex(DatabaseHandler.COLUMN_SUBTITLE))
                         , cursor.getString(cursor.getColumnIndex(DatabaseHandler.COLUMN_DURATION))
                         , cursor.getString(cursor.getColumnIndex(DatabaseHandler.COLUMN_PATH))
-                        , cursor.getInt(cursor.getColumnIndex(DatabaseHandler.COLUMN_IMAGE))
+                        , cursor.getString(cursor.getColumnIndex(DatabaseHandler.COLUMN_IMAGE))
                         , cursor.getInt(cursor.getColumnIndex(DatabaseHandler.COLUMN_OF_PLAY))
                         , cursor.getInt(cursor.getColumnIndex(DatabaseHandler.COLUMN_IS_LIKE))
                         , cursor.getInt(cursor.getColumnIndex(DatabaseHandler.COLUMN_PLAY)));
