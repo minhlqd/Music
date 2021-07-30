@@ -105,8 +105,8 @@ public class MediaPlaybackFragment extends ListFragment implements ICallBack {
 
             mTitle.setText(bundle.getString(Key.CONST_TITLE));
             mSubTitle.setText(bundle.getString(Key.CONST_SUBTITLE));
-            displayInto(getContext(), mImageMusic, bundle.getLong(Key.CONST_IMAGE));
-            displayInto(getContext(), mSmallImageMusic, bundle.getLong(Key.CONST_IMAGE));
+            getImageAlbum(getContext(), mImageMusic, bundle.getLong(Key.CONST_IMAGE));
+            getImageAlbum(getContext(), mSmallImageMusic, bundle.getLong(Key.CONST_IMAGE));
 
             int like = bundle.getInt(Key.CONST_LIKE);
             mLibaryMusic.setOnClickListener(v -> {
@@ -125,7 +125,7 @@ public class MediaPlaybackFragment extends ListFragment implements ICallBack {
         return ContentUris.withAppendedId(artworkUri,id);
     }
 
-    private void displayInto(Context context, ImageView view, Long image){
+    private void getImageAlbum(Context context, ImageView view, Long image){
         Glide.with(context)
                 .load(queryAlbumUri(image))
                 .placeholder(R.drawable.ic_music)

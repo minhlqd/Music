@@ -25,11 +25,9 @@ public class MusicReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-//        mNotificationService = (INotificationService) context;
         mAllSongOperations = new AllSongOperations(context);
         mSongsList = new ArrayList<>();
 
-//        mSongsList = mAllSongOperations.getAllSong();
 
         switch (intent.getAction()) {
             case Key.ACTION_NEXT_SONG:{

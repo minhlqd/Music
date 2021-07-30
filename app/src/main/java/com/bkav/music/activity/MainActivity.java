@@ -432,8 +432,10 @@ public class MainActivity extends AppCompatActivity implements
                     mcheckPlayMusic = true;
                 }
                 MediaPlaybackFragment mediaPlayFragment = new MediaPlaybackFragment();
+
                 mediaPlayFragment.setArguments(getBundle(mSongsList.get(mCurrentPosition)));
                 getSupportFragmentManager().beginTransaction().replace(R.id.fragment, mediaPlayFragment).commit();
+
                 mMediaPlayer.start();
                 playCycle();
                 mPlayerSheetAll.setVisibility(View.GONE);
@@ -829,17 +831,17 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void onDataPassSong(String name, String path, String subtile, Long image, boolean checkSong) {
+    public void onDataPassSong(String name, String path, String subtile, long image, boolean checkSong) {
         Toast.makeText(this, name, Toast.LENGTH_LONG).show();
         if (checkSong) {
             attachMusic(name, path);
         }
         mCkeckPlay = true;
-        //mPlayerLayout.setVisibility(View.VISIBLE);
         mTitle.setText(name);
         mSubtitle.setText(subtile);
-        displayInto(this, mImgSong, image);
-        // mImgSong.setImageResource(image);
+        getImageAlbum(this, mImgSong, image);
+        mCheckPlayerSheet = true;
+        mcheckPlayMusic = true;
         mPlayPauseSong.setImageResource(R.drawable.ic_pause_black);
     }
 
@@ -848,10 +850,10 @@ public class MainActivity extends AppCompatActivity implements
         return ContentUris.withAppendedId(artworkUri,id);
     }
 
-    private void displayInto(Context context, ImageView view, Long image){
+    private void getImageAlbum(Context context, ImageView view, Long image){
         Glide.with(context)
                 .load(queryAlbumUri(image))
-                .placeholder(R.drawable.ic_music)
+                .placeholder(R.drawable.ic_music_player)
                 .into(view);
     }
     @Override

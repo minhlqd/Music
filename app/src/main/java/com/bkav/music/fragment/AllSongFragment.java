@@ -191,10 +191,8 @@ public class AllSongFragment extends ListFragment implements ICallBack {
                             .addToBackStack("fragment")
                             .commit();
                 }
-
                 mSongAdapter.notifyDataSetChanged();
-                mRecyclerView.setAdapter(mSongAdapter);
-
+                // mRecyclerView.setAdapter(mSongAdapter);
                 getIntentService(i);
                 mCreateDataParse.fullSongList(mSongsList, i);
                 break;
