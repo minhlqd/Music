@@ -7,7 +7,7 @@ android {
     buildToolsVersion "30.0.3"
 
     defaultConfig {
-        applicationId "com.bkav.music"
+        applicationId "com.example.music"
         minSdkVersion 16
         targetSdkVersion 30
         versionCode 1

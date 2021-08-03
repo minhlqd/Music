@@ -6,12 +6,12 @@
 
     <RelativeLayout
         android:id="@+id/relative"
-        android:layout_width="40dp"
-        android:layout_height="40dp">
+        android:layout_width="@dimen/dimen_width"
+        android:layout_height="@dimen/dimen_height">
         <ImageView
             android:id="@+id/iv_music_list"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:layout_width="@dimen/dimen_width"
+            android:layout_height="@dimen/dimen_height"
             android:scaleType="fitCenter"
             android:adjustViewBounds="true"
             android:padding="5dp"
@@ -20,8 +20,8 @@
             />
         <TextView
             android:id="@+id/position"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:layout_width="@dimen/dimen_width"
+            android:layout_height="@dimen/dimen_height"
             android:textStyle="bold"
             android:textColor="#000000"
             android:text="@string/_1"

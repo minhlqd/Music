@@ -15,22 +15,22 @@
 
     <ImageView
         android:id="@+id/imageView"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
+        android:layout_width="@dimen/dimen_image_nav"
+        android:layout_height="@dimen/dimen_image_nav"
         android:paddingTop="20sp"
         app:srcCompat="@drawable/splash_play_music_192"
         tools:ignore="VectorDrawableCompat" />
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingTop="8dp"
+        android:layout_marginTop="@dimen/dimen_margin_top"
         android:text="@string/app_name"
         android:textStyle="bold"
         android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
 
     <TextView
         android:id="@+id/textView"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="@dimen/dimen_margin_top"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/minh_bkav_com" />

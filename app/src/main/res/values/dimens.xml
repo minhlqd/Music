@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="dimen_width">40dp</dimen>
+    <dimen name="dimen_height">40dp</dimen>
+    <dimen name="dimen_image_nav">100dp</dimen>
+    <dimen name="dimen_margin_top">8dp</dimen>
+</resources>
