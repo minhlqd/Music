@@ -439,12 +439,10 @@ public class MainActivity extends AppCompatActivity implements
                     MediaPlaybackFragment mediaPlayFragment = new MediaPlaybackFragment();
                     mediaPlayFragment.setArguments(getBundle(mSongsList.get(mCurrentPosition)));
                     getSupportFragmentManager().beginTransaction().replace(R.id.fragment, mediaPlayFragment).commit();
-                    Log.d(TAG, "onClick: " + getSupportFragmentManager().getBackStackEntryCount());
                 } else {
                     MediaPlaybackFragment mediaPlayFragment = new MediaPlaybackFragment();
                     mediaPlayFragment.setArguments(getBundle(mSongsList.get(mCurrentPosition)));
                     getSupportFragmentManager().beginTransaction().replace(R.id.fragment, mediaPlayFragment).commit();
-                    Log.d(TAG, "onClick: " + getSupportFragmentManager().getBackStackEntryCount());
                 }
                 playerSheetAll.setVisibility(View.GONE);
                 playerLayout.setVisibility(View.VISIBLE);
@@ -455,6 +453,7 @@ public class MainActivity extends AppCompatActivity implements
                     sBtnPlayPause.setImageResource(R.drawable.ic_play_black);
                     sBtnPlayPause.setBackground(getDrawable(R.color.background));
                 }
+                mCkeckPlay = true;
                 mCheckBackPress = false;
                 mCheckPlayerSheet = true;
                 break;
@@ -463,7 +462,6 @@ public class MainActivity extends AppCompatActivity implements
                 intentService(mCurrentPosition);
                 if (!mcheckPlayMusic) {
                     attachMusic(mDataSongList.get(0));
-                    Log.d(TAG, "onClick: " + mDataSongList.get(0).getTitle());
                     mDataSongList.get(0).setPlay(1);
                     mAllSongOperations.updateSong(mDataSongList.get(0));
                     playPauseSong.setImageResource(R.drawable.ic_pause_black);
@@ -592,13 +590,10 @@ public class MainActivity extends AppCompatActivity implements
                     sMusicService.getMediaPlayer().setOnCompletionListener(mp -> {
                         sBtnPlayPause.setImageResource(R.drawable.ic_play_black);
                         mCurrentPosition = randomSong(mCurrentPosition);
-                        Log.d(TAG, "onClick: " + mCurrentPosition);
                         attachMusic(mSongsList.get(mCurrentPosition));
                         musicNextPre(mSongsList, mCurrentPosition);
                         setCountPlay(mSongsList.get(mCurrentPosition));
-                        // if (getSupportFragmentManager().getBackStackEntryCount() == 1 && !mCheckScreen) {
-                        //    getSupportFragmentManager().beginTransaction().replace(R.id.fragment, new AllSongFragment()).commit();
-                        // }
+
                     });
                 }
                 break;
@@ -675,18 +670,20 @@ public class MainActivity extends AppCompatActivity implements
                 sBtnPlayPause.setImageResource(R.drawable.ic_play_black);
                 if (mPlayContinueFlag) {
                     if (mCurrentPosition + 1 < mSongsList.size()) {
+
                         mSongsList.get(mCurrentPosition).setPlay(0);
                         mAllSongOperations.updateSong(mSongsList.get(mCurrentPosition));
+
                         mCurrentPosition += 1;
                         attachMusic(mSongsList.get(mCurrentPosition));
                         musicNextPre(mSongsList, mCurrentPosition);
                         setCountPlay(mSongsList.get(mCurrentPosition));
-                        Log.d(TAG, "attachMusic: " + getSupportFragmentManager().getBackStackEntryCount());
+
                         if (mCheckBackPress && !mCheckScreen) {
-                            Log.d(TAG, "attachMusic: " + 0);
                             playMusic(mSongsList.get(mCurrentPosition));
                             getSupportFragmentManager().beginTransaction().replace(R.id.fragment, new AllSongFragment()).commit();
                         }
+
                     } else {
                         mSongsList.get(mCurrentPosition).setPlay(0);
                         mAllSongOperations.updateSong(mSongsList.get(mCurrentPosition));
@@ -768,6 +765,7 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     private void musicNextPre(ArrayList<Song> songListNext, int position){
+        Log.d(TAG, "musicNextPre: " + mCkeckPlay  + " " + mCheckAcitvity);
         if (mCkeckPlay && mCheckAcitvity) {
             if (mCheckScreen) {
                 MediaPlaybackFragment mediaPlayFragment = new MediaPlaybackFragment();
@@ -781,7 +779,6 @@ public class MainActivity extends AppCompatActivity implements
                         .replace(R.id.fragment, new AllSongFragment())
                         .addToBackStack("fragment").commit();
             } else {
-                Log.d(TAG, "musicNextPre: " + mCheckPlayerSheet);
                 if (mCheckPlayerSheet) {
                     MediaPlaybackFragment mediaPlayFragment = new MediaPlaybackFragment();
                     mediaPlayFragment.setArguments(getBundle(songListNext.get(position)));
@@ -831,12 +828,10 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public void onBackPressed() {
         int count = getSupportFragmentManager().getBackStackEntryCount();
-        Log.d(TAG, "onBackPressed: " + count );
         while (count>1) {
             getSupportFragmentManager().popBackStack();
             count--;
         }
-        super.onBackPressed();
         getSupportFragmentManager().beginTransaction().replace(R.id.fragment, new AllSongFragment()).commit();
         mCheckPlayerSheet = false;
         mCkeckPlay = false;
