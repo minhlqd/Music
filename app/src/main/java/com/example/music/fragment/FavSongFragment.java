@@ -171,8 +171,7 @@ public class FavSongFragment extends ListFragment implements ICallBack {
                     mFavoritesOperations.addSongFav(songsList);
                 }
                 mAllSongOperations.updateSong(songsList);
-
-                mCreateDataParsed.onDataPass(mFavSong.get(i).getTitle(), mFavSong.get(i).getPath());
+                mCreateDataParsed.onDataPass(mFavSong.get(i) );
                 MediaPlaybackFragment mediaPlayFragment = new MediaPlaybackFragment();
                 mediaPlayFragment.setArguments(getBundle(songsList));
                 if (mCreateDataParsed.checkScreen()) {

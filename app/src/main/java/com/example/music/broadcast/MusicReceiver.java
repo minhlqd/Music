@@ -67,7 +67,7 @@ public class MusicReceiver extends BroadcastReceiver {
                 break;
             }
             case Key.ACTION_PLAY_SONG:{
-                if (MainActivity.mediaPlayer.isPlaying()) {
+                /*if (MainActivity.mediaPlayer.isPlaying()) {
                     MainActivity.mediaPlayer.pause();
                     MainActivity.playPauseSong.setImageResource(R.drawable.ic_play_black);
                     MainActivity.btnPlayPause.setImageResource(R.drawable.ic_play_black);
@@ -83,7 +83,8 @@ public class MusicReceiver extends BroadcastReceiver {
                 //Log.d("receiver", "onReceive: " + title + " " + mPosition);
                 mIntentService = new Intent(context, MusicService.class);
                 mIntentService.putExtra(Key.KEY_POSITION, mPosition);
-                context.startService(mIntentService);
+                context.startService(mIntentService);*/
+                Log.d("receiver", "onReceive: " + " " + mPosition);
                 break;
             }
             case Key.ACTION_PREVIOUS_SONG:{

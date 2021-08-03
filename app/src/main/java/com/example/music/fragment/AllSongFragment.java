@@ -174,11 +174,7 @@ public class AllSongFragment extends ListFragment implements ICallBack {
 
                 mAllSongOperations.updateSong(songsList);
 
-                mCreateDataParse.onDataPassSong(mSongsList.get(i).getTitle()
-                        , mSongsList.get(i).getPath()
-                        , mSongsList.get(i).getSubTitle()
-                        , mSongsList.get(i).getImage()
-                        ,true);
+                mCreateDataParse.onDataPassSong(mSongsList.get(i));
                 MediaPlaybackFragment mediaPlayFragment = new MediaPlaybackFragment();
                 mediaPlayFragment.setArguments(getBundle(songsList));
                 if (mCreateDataParse.checkScreen()) {

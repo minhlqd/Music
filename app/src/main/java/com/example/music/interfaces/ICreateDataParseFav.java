@@ -6,7 +6,7 @@ import com.example.music.model.Song;
 import java.util.ArrayList;
 
 public interface ICreateDataParseFav {
-    void onDataPass(String name, String path);
+    void onDataPass(Song song);
 
     void fullSongList(ArrayList<Song> songList, int position);
 

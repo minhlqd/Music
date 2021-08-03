@@ -40,6 +40,7 @@ public class MusicService extends Service {
     public MediaPlayer mediaPlayer;
 
     public MusicService() {
+        mediaPlayer = new MediaPlayer();
     }
 
     @Override
@@ -98,7 +99,7 @@ public class MusicService extends Service {
                 throw new IllegalStateException("Unexpected value: " + like);
         }
 
-        if (!MainActivity.mediaPlayer.isPlaying()) {
+        if (mediaPlayer.isPlaying()) {
             mImgPlayPause = R.drawable.play_icon;
         } else {
             mImgPlayPause = R.drawable.pause_icon;
@@ -160,17 +161,24 @@ public class MusicService extends Service {
     }
 
 
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        stopForeground(true);
+    public void setMediaPlayer(MediaPlayer mediaPlayer) {
+        this.mediaPlayer = mediaPlayer;
     }
+
 
     public MediaPlayer getMediaPlayer() {
         return mediaPlayer;
     }
 
-    public void playMedia(Song song) throws Exception {
+    public void play(){
+        mediaPlayer.start();
+    }
+
+    public void pause(){
+        mediaPlayer.pause();
+    }
+
+    public void playMedia(Song song){
         try {
             mediaPlayer.reset();
             mediaPlayer.setDataSource(song.getPath());
@@ -179,6 +187,12 @@ public class MusicService extends Service {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        stopForeground(true);
     }
 
 }
