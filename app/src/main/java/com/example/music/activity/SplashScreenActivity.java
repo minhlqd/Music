@@ -19,6 +19,7 @@ public class SplashScreenActivity extends AppCompatActivity {
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
+        // delay 1s sau do ta start main activity
         Thread thread = new Thread() {
             @Override
             public void run() {

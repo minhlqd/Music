@@ -5,8 +5,6 @@ import android.content.ContentUris;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
-;
-
 import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -20,7 +18,6 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -28,13 +25,16 @@ import androidx.fragment.app.ListFragment;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
-import com.example.music.activity.MainActivity;
 import com.example.music.Key;
+import com.example.music.R;
+import com.example.music.activity.MainActivity;
 import com.example.music.interfaces.ICreateDataParseMedia;
 import com.example.music.model.Song;
-import com.example.music.R;
+import com.example.music.service.MusicService;
 
 import java.util.ArrayList;
+
+;
 
 @SuppressWarnings("ALL")
 public class MediaPlaybackFragment extends ListFragment
@@ -54,12 +54,15 @@ public class MediaPlaybackFragment extends ListFragment
     private ImageView mMenuPopup;
     private TextView mTitle;
     private TextView mSubTitle;
-    private TextView mPosition;
+    private TextView mTvPosition;
 
     private MainActivity mainActivity;
 
     private boolean checkSurface = false;
     private ICreateDataParseMedia createDataParsed;
+
+    private int mPosition;
+    private MusicService musicService;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -100,11 +103,11 @@ public class MediaPlaybackFragment extends ListFragment
         mTitle = view.findViewById(R.id.tv_music_name);
         mSubTitle = view.findViewById(R.id.tv_music_subtitle);
         mMusicDetail = view.findViewById(R.id.music_detail);
-        mPosition = view.findViewById(R.id.position);
+        mTvPosition = view.findViewById(R.id.position);
         mMenuPopup = view.findViewById(R.id.more_vert);
 
         mSmallImageMusic.setVisibility(View.VISIBLE);
-        mPosition.setVisibility(View.GONE);
+        mTvPosition.setVisibility(View.GONE);
 
         mMenuPopup.setOnClickListener(v -> {
             showMenuPopup(v);
@@ -129,11 +132,13 @@ public class MediaPlaybackFragment extends ListFragment
         }
     }
 
+    // lay duong dan anh tu album
     private Uri queryAlbumUri(long id) {
         final Uri artworkUri = Uri.parse("content://media/external/audio/albumart");
         return ContentUris.withAppendedId(artworkUri,id);
     }
 
+    // hien thi anh bai hat bang thu vien glide
     private void getImageAlbum(Context context, ImageView view, Long image){
         Glide.with(context)
                 .load(queryAlbumUri(image))
@@ -141,6 +146,7 @@ public class MediaPlaybackFragment extends ListFragment
                 .into(view);
     }
 
+    // hien menu popup
     private void showMenuPopup(View view){
         PopupMenu popupMenu = new PopupMenu(getContext(), view);
         popupMenu.inflate(R.menu.menu_popup);

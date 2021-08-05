@@ -129,6 +129,7 @@ public class FavSongFragment extends ListFragment implements ICallBack {
         return new SongAdapter(getContext(), mSearchList, this);
     }
 
+    // hien dialog hoi co muon xoa bai hat nay ko
     private void showDialog(final String index, final int position) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
         builder.setTitle(getString(R.string.delete))
@@ -146,6 +147,7 @@ public class FavSongFragment extends ListFragment implements ICallBack {
         alertDialog.show();
     }
 
+    // them su kien vuot sang trai de xoa
     ItemTouchHelper.SimpleCallback mSimpleCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT | ItemTouchHelper.LEFT) {
         @Override
         public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull  RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
@@ -161,15 +163,13 @@ public class FavSongFragment extends ListFragment implements ICallBack {
         }
     };
 
+
+    // tang luot choi
     private void setCountPlay(String title) {
         for (int i = 0; i<mFavSong.size(); i ++){
             if (mFavSong.get(i).getTitle().equals(title)) {
                 Song songsList = mFavSong.get(i);
                 songsList.setCountOfPlay(songsList.getCountOfPlay() + 1);
-                if (songsList.getCountOfPlay() == 3) {
-                    songsList.setLike(1);
-                    mFavoritesOperations.addSongFav(songsList);
-                }
                 mAllSongOperations.updateSong(songsList);
                 mCreateDataParsed.onDataPass(mFavSong.get(i) );
                 MediaPlaybackFragment mediaPlayFragment = new MediaPlaybackFragment();
@@ -209,6 +209,7 @@ public class FavSongFragment extends ListFragment implements ICallBack {
         getActivity().startService(intent);
     }
 
+    // xoa khoi bai hat yeu thich
     private void removeLike(String title) {
         mSongList = new ArrayList<>();
         mSongList = mAllSongOperations.getAllSong();

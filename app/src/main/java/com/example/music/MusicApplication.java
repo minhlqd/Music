@@ -15,6 +15,7 @@ public class MusicApplication extends Application {
         createNotificationChannel();
     }
 
+    // tao kenh thong bao
     private void createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationChannel channel =

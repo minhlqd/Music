@@ -84,6 +84,7 @@ public class AllSongFragment extends ListFragment implements ICallBack {
         setContent();
     }
 
+    // hien thich danh sach bai hat
     private void setContent() {
         boolean searchedList;
         mSearchList = new ArrayList<>();
@@ -107,6 +108,7 @@ public class AllSongFragment extends ListFragment implements ICallBack {
         mRecyclerView.setAdapter(mSongAdapter);
     }
 
+    // so sanh voi text tim kiem va tra ve danh sach tuong ung
     public SongAdapter onQueryTextChange() {
         String text = mCreateDataParse.queryText();
         for (Song songs : mSongsList) {
@@ -120,6 +122,7 @@ public class AllSongFragment extends ListFragment implements ICallBack {
 
     }
 
+    // hien thi dialog hoi xem co chon bai nay la bai hat tiep theo duoc phat
     private void showDialog(final int position) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
         builder.setMessage(getString(R.string.play_next))
@@ -134,6 +137,7 @@ public class AllSongFragment extends ListFragment implements ICallBack {
         alertDialog.show();
     }
 
+    // sau khi bam se, gui du lieu cho acitivity de phat bai hat do
     @Override
     public void onClickItem(int position) {
         mAllSongOperations.updatePlaySong(mSongsList);
@@ -159,6 +163,7 @@ public class AllSongFragment extends ListFragment implements ICallBack {
         getActivity().startService(intent);
     }
 
+    // tang luot choi nhac va neu bang 3 thi se tu them vao danh sach yeu thich
     private void setCountPlay(String title) {
         for (int i = 0; i<mSongsList.size(); i ++){
             if (mSongsList.get(i).getTitle().equals(title)) {
@@ -193,6 +198,7 @@ public class AllSongFragment extends ListFragment implements ICallBack {
         }
     }
 
+    // giu item se show dialog
     @Override
     public void onLongClickItem(int position) {
         showDialog(position);

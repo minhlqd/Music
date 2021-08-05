@@ -16,8 +16,15 @@
             android:adjustViewBounds="true"
             android:padding="5dp"
             android:visibility="gone"
-            android:src="@drawable/ic_music_player"
-            />
+            android:src="@drawable/ic_music_player" />
+
+        <es.claucookie.miniequalizerlibrary.EqualizerView
+            android:id="@+id/equalizer_view"
+            android:padding="5dp"
+            android:visibility="gone"
+            android:layout_width="@dimen/dimen_width"
+            android:layout_height="@dimen/dimen_height"/>
+
         <TextView
             android:id="@+id/position"
             android:layout_width="@dimen/dimen_width"

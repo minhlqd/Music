@@ -8,11 +8,14 @@ import android.os.Build;
 import android.util.Log;
 
 import androidx.annotation.RequiresApi;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.example.music.R;
 import com.example.music.activity.MainActivity;
 import com.example.music.Key;
 import com.example.music.database.AllSongOperations;
+import com.example.music.database.FavoritesOperations;
+import com.example.music.interfaces.INotification;
 import com.example.music.model.Song;
 import com.example.music.service.MusicService;
 
@@ -21,78 +24,142 @@ import java.util.ArrayList;
 public class MusicReceiver extends BroadcastReceiver {
 
     private Intent mIntentService;
+
     private AllSongOperations mAllSongOperations;
+    private FavoritesOperations mFavoritesOperations;
+
     private ArrayList<Song> mSongsList;
     private int mPosition;
 
-    public MusicReceiver() {
+    private INotification iNotification;
+
+    public void setINotification(INotification iNotification) {
+        this.iNotification = iNotification;
     }
 
+    public MusicReceiver() {
+    }
 
     @SuppressLint("UseCompatLoadingForDrawables")
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     public void onReceive(Context context, Intent intent) {
-//        mNotificationService = (INotificationService) context;
         mAllSongOperations = new AllSongOperations(context);
+        mFavoritesOperations = new FavoritesOperations(context);
+
         mSongsList = new ArrayList<>();
+        Log.d("MinhMX", "onReceive: " + iNotification);
 
         mSongsList = mAllSongOperations.getAllSong();
-//        String title = intent.getStringExtra(Key.CONST_TITLE);
-//        for (int i=0; i< mSongsList.size(); i++) {
-//            Log.d("aaa", "onReceive: " + title);
-//            Log.d("aaa", "title " + mSongsList.get(i).getTitle());
-//            if (mSongsList.get(i).getTitle().equals(title)){
-//                Log.d("aaa", "onReceive: " + mPosition);
-//                mPosition = i;
-//                break;
-//            }
-//        }
-        int position = intent.getIntExtra(Key.KEY_POSITION, 0);
-        Log.d("aaa", "onReceive: " + position);
-        Log.d("aaa", "onReceive: " + intent.getAction());
+
+        mPosition = intent.getIntExtra(Key.KEY_POSITION, 0);
+
+        Intent intentActivity = new Intent(context, MainActivity.class).setAction(intent.getAction());
+        intentActivity.putExtra(Key.KEY_POSITION, mPosition);
+        Log.d("MinhMX", "onReceive:" + intentActivity.getAction());
+        LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
 
         switch (intent.getAction()) {
             case Key.ACTION_LIKE_SONG:{
+                Song song = mSongsList.get(mPosition);
+
+                if (song.isLike() == 1) {
+                    song.setLike(0);
+                    mFavoritesOperations.removeSong(song.getTitle());
+                } else {
+                    song.setLike(1);
+                    mFavoritesOperations.addSongFav(song);
+                }
+
+                mAllSongOperations.updateSong(song);
+                MainActivity.sMusicService.sendNotification(context, song, mPosition);
                 break;
             }
             case Key.ACTION_DISLIKE_SONG:{
-                Log.d("music", "onReceive: ");
+                Song song = mSongsList.get(mPosition);
+                if (song.isLike() == 2) {
+                    song.setLike(0);
+                } else {
+                    if (song.isLike() == 1) {
+                        mFavoritesOperations.removeSong(song.getTitle());
+                    }
+                    song.setLike(2);
+                }
+                mAllSongOperations.updateSong(song);
+                MainActivity.sMusicService.sendNotification(context, song, mPosition);
                 break;
             }
             case Key.ACTION_NEXT_SONG:{
-                mIntentService = new Intent(context, MusicService.class);
-                mIntentService.putExtra(Key.KEY_POSITION, mPosition + 1);
-                context.startService(mIntentService);
+                mSongsList.get(mPosition).setPlay(0);
+                mAllSongOperations.updateSong(mSongsList.get(mPosition));
+
+                int position = mPosition + 1;
+                if (position == mSongsList.size()) {
+                    position = 0;
+                }
+                Song song = mSongsList.get(position);
+                if (iNotification!= null) {
+                    iNotification.nextPlay(position);
+                }
+                song.setPlay(1);
+                song.setCountOfPlay(song.getCountOfPlay() + 1);
+                if (song.getCountOfPlay() == 3) {
+                    song.setLike(1);
+                    mFavoritesOperations.addSongFav(song);
+                }
+
+                mAllSongOperations.updateSong(song);
+                MainActivity.sMusicService.playMedia(song);
+                MainActivity.sMusicService.sendNotification(context, song, position);
+
+                mPosition = position;
                 break;
             }
             case Key.ACTION_PLAY_SONG:{
-                /*if (MainActivity.mediaPlayer.isPlaying()) {
-                    MainActivity.mediaPlayer.pause();
-                    MainActivity.playPauseSong.setImageResource(R.drawable.ic_play_black);
-                    MainActivity.btnPlayPause.setImageResource(R.drawable.ic_play_black);
-                    MainActivity.btnPlayPause.setBackground(context.getDrawable(R.color.background));
-
+                if (MainActivity.sMusicService.isPlaying()) {
+                    mSongsList.get(mPosition).setPlay(0);
+                    MainActivity.sMusicService.pause();
                 } else {
-                    MainActivity.mediaPlayer.start();
-                    MainActivity.playCycle();
-                    MainActivity.playPauseSong.setImageResource(R.drawable.ic_pause_black);
-                    MainActivity.btnPlayPause.setImageResource(R.drawable.pause_icon);
-                    MainActivity.btnPlayPause.setBackground(context.getDrawable(R.drawable.background_play_pause));
+                    mSongsList.get(mPosition).setPlay(1);
+                    MainActivity.sMusicService.play();
                 }
-                //Log.d("receiver", "onReceive: " + title + " " + mPosition);
-                mIntentService = new Intent(context, MusicService.class);
-                mIntentService.putExtra(Key.KEY_POSITION, mPosition);
-                context.startService(mIntentService);*/
-                Log.d("receiver", "onReceive: " + " " + mPosition);
+                mAllSongOperations.updateSong(mSongsList.get(mPosition));
+                MainActivity.sMusicService.sendNotification(context, mSongsList.get(mPosition), mPosition);
                 break;
             }
             case Key.ACTION_PREVIOUS_SONG:{
-                Log.d("receiver", "onReceive: ");
+                mSongsList.get(mPosition).setPlay(0);
+                mAllSongOperations.updateSong(mSongsList.get(mPosition));
+
+                int position = mPosition - 1;
+                if (position == -1) {
+                    position = mSongsList.size()-1;
+                }
+
+                Song song = mSongsList.get(position);
+
+                mIntentService = new Intent(context, MusicService.class);
+                mIntentService.putExtra(Key.KEY_POSITION, position);
+
+                song.setPlay(1);
+                song.setCountOfPlay(song.getCountOfPlay() + 1);
+                if (song.getCountOfPlay() == 3) {
+                    song.setLike(1);
+                    mFavoritesOperations.addSongFav(song);
+                }
+                mAllSongOperations.updateSong(song);
+                MainActivity.sMusicService.playMedia(mSongsList.get(position));
+                MainActivity.sMusicService.sendNotification(context, song, position);
+
+                mPosition = position;
                 break;
             }
             default: break;
         }
+    }
+
+    public int getPosition() {
+        return mPosition;
     }
 
 }

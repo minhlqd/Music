@@ -3,6 +3,7 @@ package com.example.music.adapter;
 import android.content.Context;
 
 import android.graphics.Typeface;
+import android.telecom.PhoneAccount;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -21,6 +22,8 @@ import com.example.music.R;
 import com.example.music.model.Song;
 
 import java.util.ArrayList;
+
+import es.claucookie.miniequalizerlibrary.EqualizerView;
 
 @SuppressWarnings("ALL")
 public class SongAdapter extends RecyclerView.Adapter<SongAdapter.ViewHolder> {
@@ -57,12 +60,16 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.ViewHolder> {
         if (songsList.getPlay() == 1) {
             holder.tvTitle.setTypeface(holder.tvTitle.getTypeface(), Typeface.BOLD);
             holder.tvPosition.setVisibility(View.GONE);
-            holder.imageMusic.setVisibility(View.VISIBLE);
+            //holder.imageMusic.setVisibility(View.VISIBLE);
+            holder.equalizerView.setVisibility(View.VISIBLE);
+            holder.equalizerView.animateBars();
             holder.imageMusic.setImageResource(R.drawable.ic_play_all_song);
         } else {
             holder.tvTitle.setTypeface(holder.tvTitle.getTypeface(), Typeface.NORMAL);
             holder.tvPosition.setVisibility(View.VISIBLE);
             holder.imageMusic.setVisibility(View.GONE);
+            holder.equalizerView.setVisibility(View.GONE);
+            holder.equalizerView.stopBars();
             holder.tvPosition.setText(String.valueOf(position + 1));
         }
         //holder.imageMusic.setImageResource(songsList.getImage());
@@ -87,6 +94,7 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.ViewHolder> {
         ImageView queueMusic;
         ImageView imageMusic;
         ImageView menuPopup;
+        EqualizerView equalizerView;
 
         public ViewHolder(View itemView, ICallBack callBack) {
             super(itemView);
@@ -95,6 +103,7 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.ViewHolder> {
             tvPosition = itemView.findViewById(R.id.position);
             queueMusic = itemView.findViewById(R.id.queue_music);
             imageMusic = itemView.findViewById(R.id.iv_music_list);
+            equalizerView = itemView.findViewById(R.id.equalizer_view);
 
             menuPopup = itemView.findViewById(R.id.more_vert);
             this.mOnClick = callBack;

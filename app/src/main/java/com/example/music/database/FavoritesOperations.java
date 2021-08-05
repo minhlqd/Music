@@ -46,24 +46,25 @@ public class FavoritesOperations {
         dbHandler.close();
     }
 
-    public void addSongFav(Song songsList) {
+    // them bai hat vao danh sach yeu thich
+    public void addSongFav(Song song) {
         open();
         ContentValues values = new ContentValues();
-        values.put(DatabaseHandler.COLUMN_TITLE, songsList.getTitle());
-        values.put(DatabaseHandler.COLUMN_SUBTITLE, songsList.getSubTitle());
-        values.put(DatabaseHandler.COLUMN_DURATION, songsList.getDuration());
-        values.put(DatabaseHandler.COLUMN_PATH, songsList.getPath());
-        values.put(DatabaseHandler.COLUMN_IMAGE, songsList.getImage());
-        values.put(DatabaseHandler.COLUMN_OF_PLAY, songsList.getCountOfPlay());
-        values.put(DatabaseHandler.COLUMN_IS_LIKE, songsList.isLike());
-        values.put(DatabaseHandler.COLUMN_PLAY, songsList.getPlay());
+        values.put(DatabaseHandler.COLUMN_TITLE, song.getTitle());
+        values.put(DatabaseHandler.COLUMN_SUBTITLE, song.getSubTitle());
+        values.put(DatabaseHandler.COLUMN_DURATION, song.getDuration());
+        values.put(DatabaseHandler.COLUMN_PATH, song.getPath());
+        values.put(DatabaseHandler.COLUMN_IMAGE, song.getImage());
+        values.put(DatabaseHandler.COLUMN_OF_PLAY, song.getCountOfPlay());
+        values.put(DatabaseHandler.COLUMN_IS_LIKE, song.isLike());
+        values.put(DatabaseHandler.COLUMN_PLAY, song.getPlay());
 
         database.insertWithOnConflict(DatabaseHandler.TABLE_SONGS, null, values, SQLiteDatabase.CONFLICT_REPLACE);
 
         close();
     }
 
-
+    // lay tat ca bai hat yeu thich
     public ArrayList<Song> getAllFavorites() {
         open();
         @SuppressLint("Recycle")
@@ -72,7 +73,7 @@ public class FavoritesOperations {
         ArrayList<Song> favSongs = new ArrayList<>();
         if (cursor.getCount() > 0) {
             while (cursor.moveToNext()) {
-                Song songsList = new Song(cursor.getString(cursor.getColumnIndex(DatabaseHandler.COLUMN_TITLE))
+                Song song = new Song(cursor.getString(cursor.getColumnIndex(DatabaseHandler.COLUMN_TITLE))
                         , cursor.getString(cursor.getColumnIndex(DatabaseHandler.COLUMN_SUBTITLE))
                         , cursor.getString(cursor.getColumnIndex(DatabaseHandler.COLUMN_DURATION))
                         , cursor.getString(cursor.getColumnIndex(DatabaseHandler.COLUMN_PATH))
@@ -80,13 +81,14 @@ public class FavoritesOperations {
                         , cursor.getInt(cursor.getColumnIndex(DatabaseHandler.COLUMN_OF_PLAY))
                         , cursor.getInt(cursor.getColumnIndex(DatabaseHandler.COLUMN_IS_LIKE))
                         , cursor.getInt(cursor.getColumnIndex(DatabaseHandler.COLUMN_PLAY)));
-                favSongs.add(songsList);
+                favSongs.add(song);
             }
         }
         close();
         return favSongs;
     }
 
+    // kiem tra xem bai hat da co trong dach sach chua. neu co roi thi ta se ko them vao nua
     public boolean checkFavorites(String title) {
         open();
         @SuppressLint("Recycle")
@@ -104,6 +106,7 @@ public class FavoritesOperations {
         close();
         return false;
     }
+
     public void setPlayMusic(ArrayList<Song> songsList) {
         open();
         String whereClause =
@@ -119,11 +122,12 @@ public class FavoritesOperations {
         close();
     }
 
-    public void removeSong(String songPath) {
+    // xoa bai hat khoi danh sach yeu thich
+    public void removeSong(String title) {
         open();
         String whereClause =
                 DatabaseHandler.COLUMN_TITLE + "=?";
-        String[] whereArgs = new String[]{songPath};
+        String[] whereArgs = new String[]{title};
         database.delete(DatabaseHandler.TABLE_SONGS, whereClause, whereArgs);
         close();
     }

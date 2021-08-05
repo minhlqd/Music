@@ -13,7 +13,6 @@ public interface ICreateDataParseSong {
 
     void fullSongList(ArrayList<Song> songList, int position);
 
-    void playCheckSong(boolean checkSong);
 
     void currentSong(Song song, int position);
     void getLength(int length);

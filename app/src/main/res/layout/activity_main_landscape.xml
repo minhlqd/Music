@@ -36,6 +36,7 @@
             <include android:id="@+id/player_sheet_all_songs"
                 layout="@layout/player_sheet_all"/>
         </LinearLayout>
+
         <FrameLayout
 
             android:id="@+id/fragment_media"
