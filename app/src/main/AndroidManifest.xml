@@ -26,7 +26,8 @@
             android:exported="true"
             tools:ignore="ExportedReceiver" />
 
-        <activity android:name="com.example.music.activity.MainActivity">
+        <activity android:name="com.example.music.activity.MainActivity"
+            android:configChanges="orientation">
             <meta-data
                 android:name="android.app.searchable"
                 android:resource="@xml/searchable" />

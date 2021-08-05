@@ -7,15 +7,6 @@
     android:layout_gravity="center"
     android:background="@color/light_color">
 
-    <RelativeLayout
-        android:id="@+id/music_detail"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:layout_constraintTop_toTopOf="parent">
-        <include
-            android:id="@+id/item_music"
-            layout="@layout/playlist_items" />
-    </RelativeLayout>
 
 
     <ImageView
@@ -29,5 +20,15 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/music_detail" />
+    <RelativeLayout
+        android:id="@+id/music_detail"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/light_color"
+        app:layout_constraintTop_toTopOf="parent">
+        <include
+            android:id="@+id/item_music"
+            layout="@layout/playlist_items" />
+    </RelativeLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

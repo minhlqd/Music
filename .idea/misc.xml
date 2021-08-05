@@ -4,7 +4,13 @@
     <option name="filePathToZoomLevelMap">
       <map>
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.19322916666666667" />
+        <entry key="app/src/main/res/layout/activity_main_landscape.xml" value="0.2667572463768116" />
+        <entry key="app/src/main/res/layout/activity_splash_screen.xml" value="0.1890625" />
+        <entry key="app/src/main/res/layout/drawer_header_layout.xml" value="0.1890625" />
+        <entry key="app/src/main/res/layout/fragment_all_songs.xml" value="0.1890625" />
+        <entry key="app/src/main/res/layout/fragment_media.xml" value="0.1890625" />
         <entry key="app/src/main/res/layout/fragment_media_play_back.xml" value="0.2" />
+        <entry key="app/src/main/res/menu/menu_popup.xml" value="0.1890625" />
         <entry key="app/src/main/res/menu/navigation_menu.xml" value="0.18489583333333334" />
       </map>
     </option>

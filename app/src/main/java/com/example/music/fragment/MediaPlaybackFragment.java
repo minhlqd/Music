@@ -75,7 +75,7 @@ public class MediaPlaybackFragment extends ListFragment
         Display display = ((WindowManager)getActivity().getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
         if (display.getRotation() == Surface.ROTATION_90 || display.getRotation() == Surface.ROTATION_270) {
             ((AppCompatActivity) getActivity()).getSupportActionBar().show();
-            mMusicDetail.setVisibility(View.GONE);
+            // mMusicDetail.setVisibility(View.GONE);
         } else {
             mMusicDetail.setVisibility(View.VISIBLE);
             ((AppCompatActivity) getActivity()).getSupportActionBar().hide();

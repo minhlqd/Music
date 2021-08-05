@@ -23,6 +23,9 @@ public class Key {
     public static final String ACTION_DISLIKE_SONG =
             "com.example.music.ACTION_DISLIKE_SONG";
 
+    public static final String SHARE_PREFERENCES =
+            "com.example.android.music";
+
     public static final String CONST_IMAGE = "image";
 
     public static final String CONST_TITLE = "title";
@@ -30,7 +33,6 @@ public class Key {
     public static final String CONST_SUBTITLE = "subtitle";
 
     public static final String CONST_LIKE = "like";
-
 
 
 }
