@@ -19,12 +19,6 @@
             android:background="#FF5722"
             android:theme="@style/ThemeOverlay.AppCompat.ActionBar" />
 
-        <FrameLayout
-            android:id="@+id/fragment"
-            android:layout_width="280dp"
-            android:layout_height="match_parent"
-            android:layout_below="@id/toolbar" />
-
         <LinearLayout
             android:visibility="gone"
             android:id="@+id/linear_play_sheet_all"
@@ -36,26 +30,29 @@
             <include android:id="@+id/player_sheet_all_songs"
                 layout="@layout/player_sheet_all"/>
         </LinearLayout>
-
-        <FrameLayout
-
-            android:id="@+id/fragment_media"
-            android:layout_width="450dp"
-            android:layout_height="match_parent"
-            android:layout_below="@id/toolbar"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentRight="true" />
         <LinearLayout
-            android:id="@+id/ll_include_controls"
-            android:layout_width="450dp"
-            android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentBottom="true"
-            android:layout_alignParentRight="true">
+            android:layout_below="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:weightSum="10">
 
-            <include layout="@layout/player_layout" />
+            <FrameLayout
+                android:id="@+id/fragment"
+                android:layout_weight="4"
+                android:layout_width="0dp"
+                android:layout_height="match_parent" />
 
+
+            <FrameLayout
+                android:layout_weight="6"
+                android:id="@+id/fragment_media"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentRight="true" />
         </LinearLayout>
+
+
     </RelativeLayout>
 
     <com.google.android.material.navigation.NavigationView

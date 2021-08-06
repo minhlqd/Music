@@ -31,16 +31,6 @@
             <include android:id="@+id/player_sheet_all_songs"
                 layout="@layout/player_sheet_all"/>
         </LinearLayout>
-        <LinearLayout
-            android:visibility="gone"
-            android:id="@+id/ll_include_controls"
-            android:layout_width="410dp"
-            android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentBottom="true"
-            android:layout_alignParentRight="true">
-            <include layout="@layout/player_layout" />
-        </LinearLayout>
 
     </RelativeLayout>
 

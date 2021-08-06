@@ -13,7 +13,9 @@ import android.graphics.BitmapFactory;
 import android.media.MediaPlayer;
 import android.os.Binder;
 import android.os.IBinder;
+import android.provider.MediaStore;
 import android.util.Log;
+import android.widget.RemoteViews;
 
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
@@ -26,6 +28,7 @@ import com.example.music.database.AllSongOperations;
 import com.example.music.interfaces.INotification;
 import com.example.music.model.Song;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
 
@@ -33,7 +36,9 @@ import java.util.ArrayList;
 public class MusicService extends Service {
 
     public static final int NOTIFY_ID = 1;
+    public static final int REQUEST_CODE = 1;
 
+    public static final int CHECK_PLAY = 0;
     private int mImgLike;
     private int mImgDislike;
     private int mImgPlayPause;
@@ -52,14 +57,10 @@ public class MusicService extends Service {
     private MainActivity mainActivity;
     private INotification mINotification;
 
-    class MusicServiceBinder extends Binder {
-        public MusicService getService(){
-            return MusicService.this;
-        }
-    }
-
     private boolean mIsNotification = false;
     private boolean mIsContext = false;
+
+    private boolean checkOnCompletionListener = false;
 
     public MusicService() {
         if (mediaPlayer == null) {
@@ -86,10 +87,10 @@ public class MusicService extends Service {
     @Override
     protected void attachBaseContext(Context newBase) {
         super.attachBaseContext(newBase);
-        if (mIsContext) {
-            mINotification = (INotification) newBase;
-            mIsContext = false;
-        }
+        // if (mIsContext) {
+        //    mINotification = (INotification) newBase;
+        //    mIsContext = false;
+        // }
         mAllSongOperations = new AllSongOperations(newBase);
     }
 
@@ -109,18 +110,22 @@ public class MusicService extends Service {
     }
 
     public void sendNotification(Context context, Song song, int position) {
+        if (mINotification != null) {
+            //mSongsList = mAllSongOperations.getAllSong();
+            mINotification.nextPlay(position);
+        }
         switch (song.isLike()) {
-            case 0:{
+            case Key.NO_LIKE:{
                 mImgLike = R.drawable.ic_like;
                 mImgDislike = R.drawable.ic_dislike;
                 break;
             }
-            case 1:{
+            case Key.LIKE:{
                 mImgLike = R.drawable.ic_like_black;
                 mImgDislike = R.drawable.ic_dislike;
                 break;
             }
-            case 2:{
+            case Key.DISLIKE:{
                 mImgLike = R.drawable.ic_like;
                 mImgDislike = R.drawable.ic_dislike_black;
                 break;
@@ -128,68 +133,115 @@ public class MusicService extends Service {
             default:
                 throw new IllegalStateException("Unexpected value: " + song.isLike());
         }
-
-        if (song.getPlay() == 0) {
-            Log.d("aaa", "sendNotification: " + mediaPlayer.isPlaying());
-            mImgPlayPause = R.drawable.play_icon;
-        } else {
-            Log.d("aaa", "sendNotification: " + mediaPlayer.isPlaying());
-            mImgPlayPause = R.drawable.pause_icon;
-        }
+        Log.d("MinhMX", "sendNotification: " + song.getPlay());
+//        if (song.getPlay() == CHECK_PLAY) {
+//            mImgPlayPause = R.drawable.play_icon;
+//        } else {
+//            mImgPlayPause = R.drawable.pause_icon;
+//        }
 
         Log.d("MinhMX", "sendNotification: " + mINotification);
 
         Intent intentNextSong = new Intent(context, MusicReceiver.class)
                 .setAction(Key.ACTION_NEXT_SONG).putExtra(Key.KEY_POSITION, position);
         PendingIntent pendingIntentNext =
-                PendingIntent.getBroadcast(context, 1, intentNextSong, PendingIntent.FLAG_UPDATE_CURRENT);
+                PendingIntent.getBroadcast(context, REQUEST_CODE, intentNextSong, PendingIntent.FLAG_UPDATE_CURRENT);
 
         Intent intentPlaySong = new Intent(context, MusicReceiver.class)
                 .setAction(Key.ACTION_PLAY_SONG).putExtra(Key.KEY_POSITION, position);
 
         PendingIntent pendingIntentPlay =
-                PendingIntent.getBroadcast(context, 1, intentPlaySong, PendingIntent.FLAG_UPDATE_CURRENT);
+                PendingIntent.getBroadcast(context, REQUEST_CODE, intentPlaySong, PendingIntent.FLAG_UPDATE_CURRENT);
 
         Intent intentPreSong = new Intent(context, MusicReceiver.class)
                 .setAction(Key.ACTION_PREVIOUS_SONG).putExtra(Key.KEY_POSITION, position);
         PendingIntent pendingIntentPre =
-                PendingIntent.getBroadcast(context, 1, intentPreSong, PendingIntent.FLAG_UPDATE_CURRENT);
+                PendingIntent.getBroadcast(context, REQUEST_CODE, intentPreSong, PendingIntent.FLAG_UPDATE_CURRENT);
 
         Intent intentLikeSong = new Intent(context, MusicReceiver.class)
                 .setAction(Key.ACTION_LIKE_SONG).putExtra(Key.KEY_POSITION, position);
         PendingIntent pendingIntentLike =
-                PendingIntent.getBroadcast(context, 1, intentLikeSong, PendingIntent.FLAG_UPDATE_CURRENT);
+                PendingIntent.getBroadcast(context, REQUEST_CODE, intentLikeSong, PendingIntent.FLAG_UPDATE_CURRENT);
 
         Intent intentDislikeSong = new Intent(context, MusicReceiver.class)
                 .setAction(Key.ACTION_DISLIKE_SONG).putExtra(Key.KEY_POSITION, position);
         PendingIntent pendingIntentDislike =
-                PendingIntent.getBroadcast(context, 1, intentDislikeSong, PendingIntent.FLAG_UPDATE_CURRENT);
+                PendingIntent.getBroadcast(context, REQUEST_CODE, intentDislikeSong, PendingIntent.FLAG_UPDATE_CURRENT);
 //        Log.d("position", "sendNotification: " + position);
 //        Intent intent = new Intent(context, MusicReceiver.class);
 //         sendBroadcast(intentPlaySong);
-//        Intent intentActivity = new Intent(context, class);
-//        PendingIntent pendingIntentActivity = PendingIntent.getActivity(context, 1, intentActivity, PendingIntent.FLAG_UPDATE_CURRENT);
+//        Intent intentActivity = new Intent(context, MainActivity.class);
+//        intentActivity.putExtra(Key.KEY_POSITION, position);
+//        PendingIntent pendingIntentActivity =
+//                PendingIntent.getActivity(context, REQUEST_CODE, intentActivity, PendingIntent.FLAG_UPDATE_CURRENT);
 
-        Bitmap bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_music_player);
-        Notification notificationMusic = new NotificationCompat.Builder(context, CHANNEL_ID)
-                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-                .setSubText("MinhMX")
-                .setContentTitle(song.getTitle())
-                .setContentText(song.getSubTitle())
-                .setSmallIcon(R.drawable.splash_play_music_192)
-                .setLargeIcon(bitmap)
-                .addAction(mImgLike, "like", pendingIntentLike)
-                .addAction(R.drawable.previous_icon, "previous",pendingIntentPre)
-                .addAction(mImgPlayPause, "pause", pendingIntentPlay)
-                .addAction(R.drawable.next_icon, "next", pendingIntentNext)
-                .addAction(mImgDislike, "dislike", pendingIntentDislike)
-                .setStyle(new androidx.media.app.NotificationCompat.MediaStyle()
-                        .setShowActionsInCompactView(1,2,3))
-                .build();
 
-        if (mINotification != null) {
-            mINotification.nextPlay(position);
+        RemoteViews notification_small = new RemoteViews(context.getPackageName(), R.layout.notification_small);
+        RemoteViews notification_big = new RemoteViews(context.getPackageName(), R.layout.notification_big);
+
+
+
+        long image = song.getImage();
+        Bitmap bitmap = null;
+        try {
+            if (context.getContentResolver() != null) {
+                bitmap = MediaStore.Images.Media.getBitmap(context.getContentResolver(), song.queryAlbumUri(image));
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
+        Log.d("MinhMX", "sendNotification: bitmap " + bitmap);
+//        if (bitmap == null) {
+//            bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_music_player);
+//        }
+//        Notification notificationMusic = new NotificationCompat.Builder(context, CHANNEL_ID)
+//                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+//                .setSubText("MinhMX")
+//                .setContentTitle(song.getTitle())
+//                .setContentText(song.getSubTitle())
+//                .setSmallIcon(R.drawable.splash_play_music_192)
+//                .setLargeIcon(bitmap)
+//                // .setContentIntent(pendingIntentActivity)
+//                .addAction(mImgLike, "like", pendingIntentLike)
+//                .addAction(R.drawable.previous_icon, "previous",pendingIntentPre)
+//                .addAction(mImgPlayPause, "pause", pendingIntentPlay)
+//                .addAction(R.drawable.next_icon, "next", pendingIntentNext)
+//                .addAction(mImgDislike, "dislike", pendingIntentDislike)
+//                .setStyle(new androidx.media.app.NotificationCompat.MediaStyle()
+//                        .setShowActionsInCompactView(1,2,3))
+//                .build();
+
+        notification_small.setImageViewBitmap(R.id.image_music_notification, bitmap);
+
+        notification_big.setTextViewText(R.id.tv_song_name_notification, song.getTitle());
+        notification_big.setTextViewText(R.id.tv_song_author_notification, song.getSubTitle());
+        notification_big.setImageViewBitmap(R.id.image_music_notification, bitmap);
+
+        notification_small.setOnClickPendingIntent(R.id.icon_next_notification, pendingIntentNext);
+        notification_small.setOnClickPendingIntent(R.id.icon_previous_notification, pendingIntentPre);
+        notification_small.setOnClickPendingIntent(R.id.icon_play__notification_small, pendingIntentPlay);
+
+        notification_big.setOnClickPendingIntent(R.id.icon_next_notification, pendingIntentNext);
+        notification_big.setOnClickPendingIntent(R.id.icon_previous_notification, pendingIntentPre);
+        notification_big.setOnClickPendingIntent(R.id.icon_play__notification_small, pendingIntentPlay);
+        if (song.getPlay() == CHECK_PLAY) {
+            notification_small.setImageViewResource(R.id.icon_play__notification_small, R.drawable.ic_play_black);
+            notification_small.setOnClickPendingIntent(R.id.icon_play__notification_small, pendingIntentPlay);
+            notification_big.setImageViewResource(R.id.icon_play_notification_big, R.drawable.ic_play_black);
+            notification_big.setOnClickPendingIntent(R.id.icon_play_notification_big, pendingIntentPlay);
+        } else {
+            notification_small.setImageViewResource(R.id.icon_play__notification_small, R.drawable.ic_pause_black);
+            notification_small.setOnClickPendingIntent(R.id.icon_play__notification_small, pendingIntentPlay);
+            notification_big.setImageViewResource(R.id.icon_play_notification_big, R.drawable.ic_pause_black);
+            notification_big.setOnClickPendingIntent(R.id.icon_play_notification_big, pendingIntentPlay);
+        }
+
+        Notification notificationMusic = new NotificationCompat.Builder(context, CHANNEL_ID)
+                .setSmallIcon(R.drawable.splash_play_music_192)
+                .setStyle(new NotificationCompat.DecoratedCustomViewStyle())
+                .setCustomContentView(notification_small)
+                .setCustomBigContentView(notification_big)
+                .build();
         if (mIsNotification) {
             startForeground(NOTIFY_ID, notificationMusic);
             mIsNotification = false;
@@ -210,10 +262,12 @@ public class MusicService extends Service {
     }
 
     public void play(){
+        checkOnCompletionListener = false;
         mediaPlayer.start();
     }
 
     public void pause(){
+        checkOnCompletionListener = false;
         mediaPlayer.pause();
     }
 
@@ -241,12 +295,20 @@ public class MusicService extends Service {
     public void playMedia(Song song){
         try {
             mediaPlayer.reset();
+            checkOnCompletionListener = false;
             mediaPlayer.setDataSource(song.getPath());
             mediaPlayer.prepare();
             mediaPlayer.start();
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public boolean checkOnCompletionListener () {
+        mediaPlayer.setOnCompletionListener(mp -> {
+            checkOnCompletionListener = true;
+        });
+        return checkOnCompletionListener;
     }
 
     @Override

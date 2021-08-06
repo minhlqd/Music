@@ -1,5 +1,13 @@
 package com.example.music.model;
 
+import android.content.ContentUris;
+import android.content.Context;
+import android.net.Uri;
+import android.widget.ImageView;
+
+import com.bumptech.glide.Glide;
+import com.example.music.R;
+
 public class Song {
 
     private String title;
@@ -10,6 +18,10 @@ public class Song {
     private int countOfPlay;
     private int isLike;
     private int play;
+
+    public Song() {
+
+    }
 
     public Song(String title, String subTitle, String duration, String path, long image, int countOfPlay, int isLike, int play) {
         this.title = title;
@@ -85,5 +97,21 @@ public class Song {
     public void setImage(long image) {
         this.image = image;
     }
+
+    //TODO HoanNTg: update anh cua bai hat thi de trong Song
+    // lay path anh cua bat hat tu album
+    public Uri queryAlbumUri(long id) {
+        final Uri artworkUri = Uri.parse("content://media/external/audio/albumart");
+        return ContentUris.withAppendedId(artworkUri,id);
+    }
+
+    // hien thi anh bai hai thong qua thu vien Glide
+    public void getImageAlbum(Context context, ImageView view, Long image){
+        Glide.with(context)
+                .load(queryAlbumUri(image))
+                .placeholder(R.drawable.ic_music_player)
+                .into(view);
+    }
+
 }
 

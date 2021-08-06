@@ -34,5 +34,8 @@ public class Key {
 
     public static final String CONST_LIKE = "like";
 
+    public static final int NO_LIKE = 0;
+    public static final int LIKE = 1;
+    public static final int DISLIKE = 2;
 
 }

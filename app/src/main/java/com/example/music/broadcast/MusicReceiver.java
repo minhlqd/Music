@@ -49,7 +49,7 @@ public class MusicReceiver extends BroadcastReceiver {
 
         mSongsList = new ArrayList<>();
         Log.d("MinhMX", "onReceive: " + iNotification);
-
+        //TODO HoanNTg: Mỗi lần receive broadcast lại phải query allsong từ database à?
         mSongsList = mAllSongOperations.getAllSong();
 
         mPosition = intent.getIntExtra(Key.KEY_POSITION, 0);

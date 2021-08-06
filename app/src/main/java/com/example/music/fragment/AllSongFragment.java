@@ -180,7 +180,6 @@ public class AllSongFragment extends ListFragment implements ICallBack {
                 mAllSongOperations.updateSong(songsList);
 
                 mCreateDataParse.onDataPassSong(mSongsList.get(i));
-
                 MediaPlaybackFragment mediaPlayFragment = new MediaPlaybackFragment();
                 mediaPlayFragment.setArguments(getBundle(songsList));
 
@@ -192,7 +191,6 @@ public class AllSongFragment extends ListFragment implements ICallBack {
                             .addToBackStack("fragment")
                             .commit();
                 }
-
                 mSongAdapter.notifyDataSetChanged();
                 // mRecyclerView.setAdapter(mSongAdapter);
                 getIntentService(i);

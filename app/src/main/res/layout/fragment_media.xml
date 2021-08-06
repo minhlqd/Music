@@ -7,16 +7,14 @@
     android:layout_gravity="center"
     android:background="@color/light_color">
 
-
-
     <ImageView
         android:id="@+id/image_music"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:adjustViewBounds="true"
         android:scaleType="fitCenter"
         android:src="@drawable/legends"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/linear_player_layout"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/music_detail" />
@@ -24,11 +22,23 @@
         android:id="@+id/music_detail"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/light_color"
+        android:background="@color/background"
         app:layout_constraintTop_toTopOf="parent">
         <include
             android:id="@+id/item_music"
             layout="@layout/playlist_items" />
     </RelativeLayout>
+
+    <LinearLayout
+        android:id="@+id/linear_player_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <include
+            android:id="@+id/player_layout"
+            layout="@layout/player_layout" />
+    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

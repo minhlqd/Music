@@ -3,7 +3,6 @@ package com.example.music.activity;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.SearchManager;
-import android.content.BroadcastReceiver;
 import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
@@ -11,10 +10,8 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
-import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.Display;
@@ -25,7 +22,6 @@ import android.view.Surface;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
@@ -43,13 +39,11 @@ import androidx.core.content.ContextCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.example.music.Key;
 import com.example.music.R;
-//import com.example.music.broadcast.MusicReceiver;
 import com.example.music.broadcast.MusicReceiver;
 import com.example.music.database.AllSongOperations;
 import com.example.music.database.FavoritesOperations;
@@ -57,7 +51,6 @@ import com.example.music.fragment.AllSongFragment;
 import com.example.music.fragment.FavSongFragment;
 import com.example.music.fragment.MediaPlaybackFragment;
 import com.example.music.interfaces.ICreateDataParseFav;
-import com.example.music.interfaces.ICreateDataParseMedia;
 import com.example.music.interfaces.ICreateDataParseSong;
 import com.example.music.interfaces.INotification;
 import com.example.music.model.Song;
@@ -66,28 +59,17 @@ import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.snackbar.Snackbar;
 
 import java.util.ArrayList;
-import java.util.Random;
 
 @SuppressWarnings("ALL")
+//TODO HoanNTg: Xem lại phần sử dụng AllSongOperation, FavoriteOperation thấy new nhiều chỗ, query allsong nhiều lần
 public class MainActivity extends AppCompatActivity implements
-          View.OnClickListener
+        View.OnClickListener
         , ICreateDataParseSong
         , ICreateDataParseFav
-        , ICreateDataParseMedia
         , INotification{
 
     public static final String TAG = "MinhMX";
-
     private Menu menu;
-
-    private ImageButton mBtnPlayPause;
-    private ImageView mBtnReplay;
-    private ImageButton mBtnPrev;
-    private ImageButton mBtnNext;
-    private ImageButton mBtnDisLike;
-    private ImageButton mBtnLike;
-    private ImageView mBtnShuffle;
-
     private TextView mTitle;
     private TextView mSubtitle;
     private ImageView mPlayPauseSong;
@@ -141,9 +123,6 @@ public class MainActivity extends AppCompatActivity implements
 
     private Intent mupdateNotification;                      // intent service
 
-    public static Handler handler;
-    public static Runnable runnable;
-
     private MusicReceiver mReceiver = new MusicReceiver();
 
     private boolean mIsBinder = false;
@@ -178,7 +157,9 @@ public class MainActivity extends AppCompatActivity implements
 
         }
 
+        mFavoritesOperations = new FavoritesOperations(this);
         mAllSongOperations = new AllSongOperations(this);
+        mSongsList = mAllSongOperations.getAllSong();
         sMusicService = new MusicService();
 
         init();
@@ -188,19 +169,10 @@ public class MainActivity extends AppCompatActivity implements
 
         mPreferences = getSharedPreferences(Key.SHARE_PREFERENCES, MODE_PRIVATE);
 
-        /*if (mPreferences != null) {
-            mCurrentPosition = mPreferences.getInt(Key.KEY_POSITION,0);
-            Log.d(TAG, "onCreate: " + mCurrentPosition);
-            attachMusic(mAllSongOperations.getAllSong().get(mCurrentPosition));
-            updateUI(mCurrentPosition);
-            mBtnReplay.setImageResource(R.drawable.ic_repeat_one);
-            mRepeatFlag = true;
-        }*/
-
-        // cap nhat lai trang thai cua UI trc khi xoay man hinh
+        // cap nhat lai trang thai cua UI sau khi xoay man hinh
         if (savedInstanceState != null) {
             mCurrentPosition = savedInstanceState.getInt(Key.KEY_POSITION);
-            Song song = mAllSongOperations.getAllSong().get(mCurrentPosition);
+            Song song = mSongsList.get(mCurrentPosition);
             attachMusic(song);
             song.setPlay(1);
             mAllSongOperations.updateSong(song);
@@ -214,17 +186,9 @@ public class MainActivity extends AppCompatActivity implements
     // anh xa cac view
     @SuppressLint("NonConstantResourceId")
     private void init() {
-        // cac button choi nhac
-        mBtnPlayPause = findViewById(R.id.img_btn_play);
-        mBtnPrev = findViewById(R.id.img_btn_previous);
-        mBtnNext = findViewById(R.id.img_btn_next);
-        mBtnReplay = findViewById(R.id.img_btn_replay);
-        mBtnDisLike = findViewById(R.id.img_btn_dislike);
-        mBtnLike = findViewById(R.id.img_btn_like);
-        mBtnShuffle = findViewById(R.id.img_btn_shuffle);
 
         // layout chua cac button choi nhac
-        playerLayout = findViewById(R.id.ll_include_controls);
+        // playerLayout = findViewById(R.id.ll_include_controls);
 
         mFragmentAllSong = findViewById(R.id.fragment);
         mFragmentMediaPlay = findViewById(R.id.fragment_media);
@@ -247,8 +211,6 @@ public class MainActivity extends AppCompatActivity implements
 
         mToolbar = findViewById(R.id.toolbar);
 
-        handler = new Handler();
-
         mToolbar.setTitleTextColor(getResources().getColor(R.color.light_color));
         setSupportActionBar(mToolbar);
 
@@ -259,9 +221,6 @@ public class MainActivity extends AppCompatActivity implements
         actionBar.setHomeAsUpIndicator(R.drawable.menu_icon);
 
         AllSongFragment createAllSongs = new AllSongFragment();
-
-        mFavoritesOperations = new FavoritesOperations(this);
-        mAllSongOperations = new AllSongOperations(this);
 
         // xac dinh man hinh ngang hay doc de hien thi cac fragment
         if (mDisplay.getRotation() == Surface.ROTATION_90 ||
@@ -278,7 +237,6 @@ public class MainActivity extends AppCompatActivity implements
                     .replace(R.id.fragment_media, new MediaPlaybackFragment())
                     .addToBackStack("Fragment")
                     .commit();
-            playerLayout.setVisibility(View.VISIBLE);
         } else {
             mCheckScreen = false;
             checkScreen();
@@ -296,17 +254,9 @@ public class MainActivity extends AppCompatActivity implements
                         fragmentManager.beginTransaction();
                 fragmentTransaction.remove(mediaPlaybackFragment).commit();
             }
-            playerLayout.setVisibility(View.GONE);
         }
 
-        // bat su kien onclick cho cac button choi nhac
-        mBtnNext.setOnClickListener(this);
-        mBtnPrev.setOnClickListener(this);
-        mBtnReplay.setOnClickListener(this);
-        mBtnPlayPause.setOnClickListener(this);
-        mBtnLike.setOnClickListener(this);
-        mBtnDisLike.setOnClickListener(this);
-        mBtnShuffle.setOnClickListener(this);
+
         mPlayPauseSong.setOnClickListener(this);
         playerSheetAll.setOnClickListener(this);
 
@@ -376,6 +326,7 @@ public class MainActivity extends AppCompatActivity implements
         }
     }
 
+    //TODO HoanNTg: Adapter phụ trách việc hiển thị các item lên recycler view -> query bài hát từ database bên adapter
     // lay nhac tu trong database cua may
     private void getMusic() {
         mDataSongList = new ArrayList<>();
@@ -413,7 +364,7 @@ public class MainActivity extends AppCompatActivity implements
     private void playMusic(Song song) {
         mTitle.setText(song.getTitle());
         mSubtitle.setText(song.getSubTitle());
-        getImageAlbum(this, mImgSong, song.getImage());
+        song.getImageAlbum(this, mImgSong, song.getImage());
         if (sMusicService.isPlaying()) {
             mPlayPauseSong.setImageResource(R.drawable.ic_pause_black);
         } else {
@@ -444,6 +395,7 @@ public class MainActivity extends AppCompatActivity implements
         alertDialog.show();
     }
 
+    //TODO HoanNTg: Xem lại phần này, tại sao dùng adapter xử lý mà phải replace lại AllSongFragment
     // lay text o thanh search va truyen ve all song fragment
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -502,32 +454,16 @@ public class MainActivity extends AppCompatActivity implements
                     mCurrentPosition = 0;
                     mcheckPlayMusic = true;
                     attachMusic(mSongsList.get(0));
-                    MediaPlaybackFragment mediaPlayFragment = new MediaPlaybackFragment();
-                    mediaPlayFragment.setArguments(getBundle(mSongsList.get(mCurrentPosition)));
-                    getSupportFragmentManager().beginTransaction().replace(R.id.fragment, mediaPlayFragment).commit();
-                } else {
-                    MediaPlaybackFragment mediaPlayFragment = new MediaPlaybackFragment();
-                    mediaPlayFragment.setArguments(getBundle(mSongsList.get(mCurrentPosition)));
-                    getSupportFragmentManager().beginTransaction().replace(R.id.fragment, mediaPlayFragment).commit();
                 }
+                replaceFragment(mSongsList.get(mCurrentPosition), mCurrentPosition);
                 playerSheetAll.setVisibility(View.GONE);
-                playerLayout.setVisibility(View.VISIBLE);
-                if (sMusicService.isPlaying()) {
-                    mBtnPlayPause.setImageResource(R.drawable.pause_icon);
-                    mBtnPlayPause.setBackground(getDrawable(R.drawable.background_play_pause));
-                } else {
-                    mBtnPlayPause.setImageResource(R.drawable.ic_play_black);
-                    mBtnPlayPause.setBackground(getDrawable(R.color.background));
-                }
                 mCkeckPlay = true;
                 mCheckBackPress = false;
                 mCheckPlayerSheet = true;
                 break;
             }
-
             // play/pause song
             case R.id.play_pause_song:{
-                updateNotification(mCurrentPosition);
                 if (!mcheckPlayMusic) {
                     attachMusic(mDataSongList.get(0));
                     mPlayPauseSong.setImageResource(R.drawable.ic_pause_black);
@@ -541,223 +477,36 @@ public class MainActivity extends AppCompatActivity implements
                     } else if (!sMusicService.isPlaying()) {
                         sMusicService.play();
                         mPlayPauseSong.setImageResource(R.drawable.ic_pause_black);
-                        playCycle();
                     }
                 }
-                break;
-            }
-
-            // play/pause ben mediafragment
-            case R.id.img_btn_play: {
                 updateNotification(mCurrentPosition);
-                if (mCheckFlag) {
-                    if (sMusicService.isPlaying()) {
-                        sMusicService.pause();
-
-                        mSongsList.get(mCurrentPosition).setPlay(0);
-                        mAllSongOperations.updateSong(mSongsList.get(mCurrentPosition));
-
-                        mBtnPlayPause.setImageResource(R.drawable.ic_play_black);
-                        mBtnPlayPause.setBackground(getDrawable(R.color.background));
-                    } else if (!sMusicService.isPlaying()) {
-                        sMusicService.play();
-
-                        mSongsList.get(mCurrentPosition).setPlay(1);
-                        mAllSongOperations.updateSong(mSongsList.get(mCurrentPosition));
-
-                        mBtnPlayPause.setImageResource(R.drawable.pause_icon);
-                        mBtnPlayPause.setBackground(getDrawable(R.drawable.background_play_pause));
-                        playCycle();
-                    }
-                } else {
-                    Toast.makeText(this, "Select a Song . .", Toast.LENGTH_SHORT).show();
-                }
-                break;
-            }
-
-            // replay lai bai hat dang dc phat
-            case R.id.img_btn_replay: {
-                if (mRepeatFlag) {
-                    Toast.makeText(this, "Replaying Removed..", Toast.LENGTH_SHORT).show();
-                    mBtnReplay.setImageResource(R.drawable.ic_repeat);
-                    sMusicService.looping(true);
-
-                    // add vao Preferences
-                    SharedPreferences.Editor preferencesEditor = mPreferences.edit();
-                    preferencesEditor.putInt(Key.KEY_POSITION, mCurrentPosition);
-                    preferencesEditor.apply();
-
-                    mRepeatFlag = false;
-                } else {
-                    Toast.makeText(this, "Replaying Added..", Toast.LENGTH_SHORT).show();
-                    mBtnReplay.setImageResource(R.drawable.ic_repeat_one);
-                    sMusicService.looping(false);
-
-                    // clear Preferences
-                    SharedPreferences.Editor preferencesEditor = mPreferences.edit();
-                    preferencesEditor.clear();
-                    preferencesEditor.apply();
-
-                    mRepeatFlag = true;
-                }
-                break;
-            }
-
-            // quay lai bai hat truoc do
-            case R.id.img_btn_previous: {
-                mBtnReplay.setImageResource(R.drawable.ic_repeat);
-                if (mCheckFlag) {
-
-                    // neu bai hat chay dc hon 3s thi phat lai tu dau
-                    if (sSeekbarController.getProgress() > 3000) {
-                        attachMusic(mSongsList.get(mCurrentPosition));
-                    } else {
-                        if (mCurrentPosition > 0) {
-
-                            mSongsList.get(mCurrentPosition).setPlay(0);
-                            mAllSongOperations.updateSong(mSongsList.get(mCurrentPosition));
-
-                            mCurrentPosition = mCurrentPosition - 1;
-                            setCountPlay(mSongsList.get(mCurrentPosition));
-                            attachMusic(mSongsList.get(mCurrentPosition));
-                            musicNextPre(mSongsList, mCurrentPosition);
-                        } else {
-                            mSongsList.get(mCurrentPosition).setPlay(0);
-                            mAllSongOperations.updateSong(mSongsList.get(mCurrentPosition));
-
-                            mCurrentPosition = mSongsList.size() - 1;
-                            setCountPlay(mSongsList.get(mCurrentPosition));
-                            musicNextPre(mSongsList, mCurrentPosition);
-                            attachMusic(mSongsList.get(mCurrentPosition));
-                        }
-                    }
-                }
-                break;
-            }
-
-            // chuyen den bai hat tiep theo
-            case R.id.img_btn_next: {
-                mBtnReplay.setImageResource(R.drawable.ic_repeat);
-                if (mCheckFlag) {
-                    if (mCurrentPosition + 1 < mSongsList.size()) {
-                        mSongsList.get(mCurrentPosition).setPlay(0);
-                        mAllSongOperations.updateSong(mSongsList.get(mCurrentPosition));
-                        mCurrentPosition += 1;
-                        attachMusic(mSongsList.get(mCurrentPosition));
-                        musicNextPre(mSongsList, mCurrentPosition);
-                        setCountPlay(mSongsList.get(mCurrentPosition));
-                    } else {
-                        mSongsList.get(mCurrentPosition).setPlay(0);
-                        mAllSongOperations.updateSong(mSongsList.get(mCurrentPosition));
-
-                        mCurrentPosition = 0;
-                        musicNextPre(mSongsList, mCurrentPosition);
-                        attachMusic(mSongsList.get(mCurrentPosition));
-                        setCountPlay(mSongsList.get(mCurrentPosition));
-                        mCheckFlag = true;
-                    }
-                } else {
-                    Toast.makeText(this, "Select the Song ..", Toast.LENGTH_SHORT).show();
-                }
-                break;
-            }
-
-            // phat ngau nhien bai hat trong list nhac
-            case R.id.img_btn_shuffle:{
-                if (mIsCheckShuffle) {
-                    mBtnShuffle.setImageResource(R.drawable.ic_shuffle);
-                    mIsCheckShuffle = false;
-                } else {
-                    mIsCheckShuffle = true;
-                    mBtnShuffle.setImageResource(R.drawable.ic_shuffle_black);
-                    sMusicService.getMediaPlayer().setOnCompletionListener(mp -> {
-                        mBtnPlayPause.setImageResource(R.drawable.ic_play_black);
-                        mCurrentPosition = randomSong(mCurrentPosition);
-                        attachMusic(mSongsList.get(mCurrentPosition));
-                        musicNextPre(mSongsList, mCurrentPosition);
-                        setCountPlay(mSongsList.get(mCurrentPosition));
-
-                    });
-                }
-                break;
-            }
-
-            // like bai hat va them vao danh sach ua thich
-            case R.id.img_btn_like:{
-                if (mLikeFlag) {
-                    mLikeFlag = false;
-                    mFavoritesOperations.removeSong(mSongsList.get(mCurrentPosition).getTitle());
-                    mSongsList.get(mCurrentPosition).setLike(0);
-                    mSongsList.get(mCurrentPosition).setCountOfPlay(0);
-                    mAllSongOperations.updateSong(mSongsList.get(mCurrentPosition));
-
-                    updateNotification(mCurrentPosition);
-                    mBtnLike.setImageResource(R.drawable.ic_like);
-
-                } else {
-                    mLikeFlag = true;
-                    mDislikeFlag = false;
-
-                    mSongsList.get(mCurrentPosition).setLike(1);
-                    if (! mFavoritesOperations.checkFavorites(mSongsList.get(mCurrentPosition).getTitle())){
-                        favMusic(mSongsList.get(mCurrentPosition));
-                    }
-
-                    updateNotification(mCurrentPosition);
-
-                    mAllSongOperations.updateSong(mSongsList.get(mCurrentPosition));
-
-                    mBtnLike.setImageResource(R.drawable.ic_like_black);
-                    mBtnDisLike.setImageResource(R.drawable.ic_dislike);
-                }
-                break;
-            }
-
-            // dislike bai hat va xoa khoi danh sach yeu thich
-            case R.id.img_btn_dislike: {
-                if (mDislikeFlag) {
-                    mDislikeFlag = false;
-                    mSongsList.get(mCurrentPosition).setLike(0);
-
-                    mAllSongOperations.updateSong(mSongsList.get(mCurrentPosition));
-
-                    updateNotification(mCurrentPosition);
-
-                    mBtnDisLike.setImageResource(R.drawable.ic_dislike);
-                } else {
-                    mDislikeFlag = true;
-                    mLikeFlag = false;
-
-                    mFavoritesOperations.removeSong(mSongsList.get(mCurrentPosition).getTitle());
-                    mSongsList.get(mCurrentPosition).setLike(2);
-                    if (mSongsList.get(mCurrentPosition).getCountOfPlay() >= 3) {
-                        mSongsList.get(mCurrentPosition).setCountOfPlay(0);
-                    }
-                    mAllSongOperations.updateSong(mSongsList.get(mCurrentPosition));
-                    updateNotification(mCurrentPosition);
-                    mBtnDisLike.setImageResource(R.drawable.ic_dislike_black);
-                    mBtnLike.setImageResource(R.drawable.ic_like);
-                }
                 break;
             }
         }
     }
 
+    private void replaceFragment(Song song, int position){
+        MediaPlaybackFragment mediaPlayFragment = new MediaPlaybackFragment();
+        mediaPlayFragment.setArguments(getBundle(song, position));
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.fragment, mediaPlayFragment)
+                .addToBackStack("fragment")
+                .commit();
+    }
+
     // phat nhac
     private void attachMusic(Song song){
-        mBtnPlayPause.setImageResource(R.drawable.ic_play_black);
         if (!mCheckScreen) {
             mToolbar.setTitle(song.getTitle());
         }
         mToolbar.setTitleTextColor(R.color.light_color);
 
         sMusicService.playMedia(song);
-        setControls();
 
         // neu ko che do phat ngau nhien thi se next bai nhu bthg
         if (!mIsCheckShuffle) {
-            sMusicService.getMediaPlayer().setOnCompletionListener(mp -> {
-                mBtnPlayPause.setImageResource(R.drawable.ic_play_black);
+            //TODO HoanNTg: setOnCompletionListener thuộc service
+            if (sMusicService.checkOnCompletionListener()){
                 if (mPlayContinueFlag) {
                     if (mCurrentPosition + 1 < mSongsList.size()) {
                         mSongsList.get(mCurrentPosition).setPlay(0);
@@ -785,57 +534,9 @@ public class MainActivity extends AppCompatActivity implements
                         }
                     }
                 }
-            });
+            }
         }
     }
-
-    // set thoie gian chay tren thanh seek bar
-    private void setControls() {
-        sSeekbarController.setMax(sMusicService.getMediaPlayer().getDuration());
-        playCycle();
-        mCheckFlag = true;
-        Log.d(TAG, "setControls: " + sMusicService.isPlaying());
-        if (sMusicService.isPlaying()) {
-            mBtnPlayPause.setImageResource(R.drawable.pause_icon);
-            mBtnPlayPause.setBackground(getDrawable(R.drawable.background_play_pause));
-            mTotalTime.setText(getTimeFormatted(sMusicService.getMediaPlayer().getDuration()));
-            Log.d(TAG, "setControls: " + mTotalTime.getText());
-        }
-        sSeekbarController.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                if (fromUser) {
-                    sMusicService.getMediaPlayer().seekTo(progress);
-                    sCurrentTime.setText(getTimeFormatted(progress));
-                }
-            }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-
-            }
-        });
-    }
-
-    // lay thoi chay
-    public static void playCycle() {
-        try {
-            sSeekbarController.setProgress(sMusicService.getMediaPlayer().getCurrentPosition());
-            sCurrentTime.setText(getTimeFormatted(sMusicService.getMediaPlayer().getCurrentPosition()));
-            if (sMusicService.isPlaying()) {
-                runnable = MainActivity::playCycle;
-                handler.postDelayed(runnable, 100);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
     // dinh dang lai thoi gian
     public static String getTimeFormatted(long milliSeconds) {
         String finalTimerString = "";
@@ -879,15 +580,6 @@ public class MainActivity extends AppCompatActivity implements
         mAllSongOperations.updateSong(song);
     }
 
-    // ngau nhien bai hat tiep theo
-    private int randomSong(int position) {
-        Random random = new Random();
-        int rdPos = random.nextInt(mSongsList.size());
-        while (position == rdPos ) {
-            rdPos = random.nextInt(mSongsList.size());
-        }
-        return rdPos;
-    }
 
     // back ve fragment dau tien
     @Override
@@ -902,7 +594,6 @@ public class MainActivity extends AppCompatActivity implements
         mCkeckPlay = false;
         playMusic(mSongsList.get(mCurrentPosition));
         playerSheetAll.setVisibility(View.VISIBLE);
-        playerLayout.setVisibility(View.GONE);
         if (sMusicService.isPlaying()) {
             mPlayPauseSong.setImageResource(R.drawable.ic_pause_black);
         } else {
@@ -912,13 +603,14 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     // gui du lieu qua bundle
-    private Bundle getBundle(Song currSong){
+    private Bundle getBundle(Song currSong, int position){
         Bundle bundle = new Bundle();
         bundle.putLong(Key.CONST_IMAGE, currSong.getImage());
         bundle.putInt(Key.CONST_LIKE, currSong.isLike());
         bundle.putString(Key.CONST_TITLE, currSong.getTitle());
         bundle.putString(Key.CONST_SUBTITLE, currSong.getSubTitle());
         bundle.putString(Key.PATH_SONG, currSong.getPath());
+        bundle.putInt(Key.KEY_POSITION, position);
         return bundle;
     }
 
@@ -927,18 +619,20 @@ public class MainActivity extends AppCompatActivity implements
         Song song = null;
         if (mSongsList != null) {
             song = mSongsList.get(position);
-        } else {
-            song = mDataSongList.get(position);
         }
-        song.setPlay(1);
+        if (sMusicService.isPlaying()) {
+            song.setPlay(1);
+        } else {
+            song.setPlay(0);
+        }
         mAllSongOperations.updateSong(song);
         sMusicService.sendNotification(this, song, position);
     }
 
 
     // them bai hat vao danh sach yeu thich
-    private void favMusic(Song favSongList) {
-        mFavoritesOperations.addSongFav(favSongList);
+    private void favMusic(Song favSong) {
+        mFavoritesOperations.addSongFav(favSong);
     }
 
     // phat bai hat duoc gui tu favorite fragment
@@ -961,25 +655,12 @@ public class MainActivity extends AppCompatActivity implements
         mCkeckPlay = true;
         mTitle.setText(song.getTitle());
         mSubtitle.setText(song.getSubTitle());
-        getImageAlbum(this, mImgSong, song.getImage());
+        song.getImageAlbum(this, mImgSong, song.getImage());
         mCheckPlayerSheet = false;
         mcheckPlayMusic = true;
         mPlayPauseSong.setImageResource(R.drawable.ic_pause_black);
     }
 
-    // lay path anh cua bat hat tu album
-    private Uri queryAlbumUri(long id) {
-        final Uri artworkUri = Uri.parse("content://media/external/audio/albumart");
-        return ContentUris.withAppendedId(artworkUri,id);
-    }
-
-    // hien thi anh bai hai thong qua thu vien Glide
-    private void getImageAlbum(Context context, ImageView view, Long image){
-        Glide.with(context)
-                .load(queryAlbumUri(image))
-                .placeholder(R.drawable.ic_music_player)
-                .into(view);
-    }
 
     @Override
     public void fullSongList(ArrayList<Song> songList, int position) {
@@ -1034,13 +715,15 @@ public class MainActivity extends AppCompatActivity implements
         if (!mCheckAcitvity) {
             if (mCheckPlayerSheet) {
                 MediaPlaybackFragment mediaPlayFragment = new MediaPlaybackFragment();
-                mediaPlayFragment.setArguments(getBundle(mSongsList.get(mCurrentPosition)));
+                mediaPlayFragment.setArguments(getBundle(mSongsList.get(mCurrentPosition), mCurrentPosition));
                 getSupportFragmentManager()
                         .beginTransaction()
                         .replace(R.id.fragment, mediaPlayFragment)
                         .addToBackStack("fragment_media").commit();
-                setControls();
             } else {
+                if (mSongsList == null) {
+                    mSongsList = mAllSongOperations.getAllSong();
+                }
                 playMusic(mSongsList.get(mCurrentPosition));
                 getSupportFragmentManager()
                         .beginTransaction()
@@ -1061,33 +744,8 @@ public class MainActivity extends AppCompatActivity implements
     protected void onDestroy() {
         super.onDestroy();
         sMusicService.getMediaPlayer().release();
-        handler.removeCallbacks(runnable);
         unregisterReceiver(mReceiver);
     }
-
-    @Override
-    public void isLike(int like) {
-        switch (like) {
-            case 0:
-                mLikeFlag = false;
-                mDislikeFlag = false;
-                mBtnLike.setImageResource(R.drawable.ic_like);
-                mBtnDisLike.setImageResource(R.drawable.ic_dislike);
-                break;
-            case 1:
-                mLikeFlag = true;
-                mDislikeFlag = false;
-                mBtnLike.setImageResource(R.drawable.ic_like_black);
-                mBtnDisLike.setImageResource(R.drawable.ic_dislike);
-                break;
-            case 2:
-                mLikeFlag = false;
-                mDislikeFlag = true;
-                mBtnLike.setImageResource(R.drawable.ic_like);
-                mBtnDisLike.setImageResource(R.drawable.ic_dislike_black);
-        }
-    }
-
 
     // luu trang thai khi xoay man hinh
     @Override
@@ -1109,11 +767,9 @@ public class MainActivity extends AppCompatActivity implements
             if (mCheckScreen) {
                 MediaPlaybackFragment mediaPlayFragment = new MediaPlaybackFragment();
                 if (mSongsList == null) {
-                    mSongsList = mAllSongOperations.getAllSong();
+                    mSongsList = mDataSongList;
                 }
-                // setTitle(mSongsList.get(position).getTitle());
-                setControls();
-                mediaPlayFragment.setArguments(getBundle(mSongsList.get(position)));
+                mediaPlayFragment.setArguments(getBundle(mSongsList.get(position), mCurrentPosition));
                 getSupportFragmentManager()
                         .beginTransaction()
                         .replace(R.id.fragment_media, mediaPlayFragment)
@@ -1126,15 +782,14 @@ public class MainActivity extends AppCompatActivity implements
             } else {
                 if (mCheckPlayerSheet) {
                     MediaPlaybackFragment mediaPlayFragment = new MediaPlaybackFragment();
-                    mediaPlayFragment.setArguments(getBundle(mSongsList.get(position)));
+                    mediaPlayFragment.setArguments(getBundle(mSongsList.get(position), mCurrentPosition));
                     getSupportFragmentManager()
                             .beginTransaction()
                             .replace(R.id.fragment, mediaPlayFragment)
                             .addToBackStack("fragment_media").commit();
-                    setControls();
                 } else {
                     if (mSongsList == null) {
-                        mSongsList = mAllSongOperations.getAllSong();
+                        mSongsList = mDataSongList;
                     }
                     mToolbar.setTitle(mSongsList.get(position).getTitle());
                     playMusic(mSongsList.get(position));

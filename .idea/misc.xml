@@ -10,6 +10,8 @@
         <entry key="app/src/main/res/layout/fragment_all_songs.xml" value="0.1890625" />
         <entry key="app/src/main/res/layout/fragment_media.xml" value="0.1890625" />
         <entry key="app/src/main/res/layout/fragment_media_play_back.xml" value="0.2" />
+        <entry key="app/src/main/res/layout/notification_big.xml" value="0.19322916666666667" />
+        <entry key="app/src/main/res/layout/notification_small.xml" value="0.19322916666666667" />
         <entry key="app/src/main/res/menu/menu_popup.xml" value="0.1890625" />
         <entry key="app/src/main/res/menu/navigation_menu.xml" value="0.18489583333333334" />
       </map>
