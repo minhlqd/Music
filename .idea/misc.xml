@@ -8,6 +8,7 @@
         <entry key="app/src/main/res/layout/activity_splash_screen.xml" value="0.1890625" />
         <entry key="app/src/main/res/layout/drawer_header_layout.xml" value="0.1890625" />
         <entry key="app/src/main/res/layout/fragment_all_songs.xml" value="0.1890625" />
+        <entry key="app/src/main/res/layout/fragment_fav.xml" value="0.35885416666666664" />
         <entry key="app/src/main/res/layout/fragment_media.xml" value="0.1890625" />
         <entry key="app/src/main/res/layout/fragment_media_play_back.xml" value="0.2" />
         <entry key="app/src/main/res/layout/notification_big.xml" value="0.19322916666666667" />

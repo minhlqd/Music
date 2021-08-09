@@ -537,6 +537,7 @@ public class MainActivity extends AppCompatActivity implements
             }
         }
     }
+
     // dinh dang lai thoi gian
     public static String getTimeFormatted(long milliSeconds) {
         String finalTimerString = "";

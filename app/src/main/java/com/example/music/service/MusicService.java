@@ -175,11 +175,8 @@ public class MusicService extends Service {
 //        PendingIntent pendingIntentActivity =
 //                PendingIntent.getActivity(context, REQUEST_CODE, intentActivity, PendingIntent.FLAG_UPDATE_CURRENT);
 
-
         RemoteViews notification_small = new RemoteViews(context.getPackageName(), R.layout.notification_small);
         RemoteViews notification_big = new RemoteViews(context.getPackageName(), R.layout.notification_big);
-
-
 
         long image = song.getImage();
         Bitmap bitmap = null;
@@ -190,26 +187,6 @@ public class MusicService extends Service {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        Log.d("MinhMX", "sendNotification: bitmap " + bitmap);
-//        if (bitmap == null) {
-//            bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_music_player);
-//        }
-//        Notification notificationMusic = new NotificationCompat.Builder(context, CHANNEL_ID)
-//                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-//                .setSubText("MinhMX")
-//                .setContentTitle(song.getTitle())
-//                .setContentText(song.getSubTitle())
-//                .setSmallIcon(R.drawable.splash_play_music_192)
-//                .setLargeIcon(bitmap)
-//                // .setContentIntent(pendingIntentActivity)
-//                .addAction(mImgLike, "like", pendingIntentLike)
-//                .addAction(R.drawable.previous_icon, "previous",pendingIntentPre)
-//                .addAction(mImgPlayPause, "pause", pendingIntentPlay)
-//                .addAction(R.drawable.next_icon, "next", pendingIntentNext)
-//                .addAction(mImgDislike, "dislike", pendingIntentDislike)
-//                .setStyle(new androidx.media.app.NotificationCompat.MediaStyle()
-//                        .setShowActionsInCompactView(1,2,3))
-//                .build();
 
         notification_small.setImageViewBitmap(R.id.image_music_notification, bitmap);
 

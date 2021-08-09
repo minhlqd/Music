@@ -246,7 +246,6 @@ public class MediaPlaybackFragment extends ListFragment
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
-            //TODO HoanNTg: thuộc MediaPlayBackFragment
             // play/pause ben mediafragment
             case R.id.img_btn_play: {
                 if (mCheckFlag) {
@@ -275,7 +274,6 @@ public class MediaPlaybackFragment extends ListFragment
                 break;
             }
 
-            //TODO HoanNTg: thuộc MediaPlayBackFragment
             // replay lai bai hat dang dc phat
             case R.id.img_btn_replay: {
                 if (mRepeatFlag) {
@@ -303,7 +301,7 @@ public class MediaPlaybackFragment extends ListFragment
                 }
                 break;
             }
-            //TODO HoanNTg: thuộc MediaPlayBackFragment
+
             // quay lai bai hat truoc do
             case R.id.img_btn_previous: {
                 mBtnReplay.setImageResource(R.drawable.ic_repeat);
@@ -336,7 +334,6 @@ public class MediaPlaybackFragment extends ListFragment
                 break;
             }
 
-            //TODO HoanNTg: thuộc MediaPlayBackFragment
             // chuyen den bai hat tiep theo
             case R.id.img_btn_next: {
                 mBtnReplay.setImageResource(R.drawable.ic_repeat);
@@ -364,7 +361,6 @@ public class MediaPlaybackFragment extends ListFragment
                 break;
             }
 
-            //TODO HoanNTg: thuộc MediaPlayBackFragment
             // phat ngau nhien bai hat trong list nhac
             case R.id.img_btn_shuffle:{
                 if (mIsCheckShuffle) {
@@ -415,7 +411,6 @@ public class MediaPlaybackFragment extends ListFragment
                 break;
             }
 
-            //TODO HoanNTg: thuộc MediaPlayBackFragment
             // dislike bai hat va xoa khoi danh sach yeu thich
             case R.id.img_btn_dislike: {
                 if (mDislikeFlag) {
