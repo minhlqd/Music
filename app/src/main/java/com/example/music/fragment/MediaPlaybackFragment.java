@@ -16,6 +16,7 @@ import android.view.Surface;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -75,6 +76,8 @@ public class MediaPlaybackFragment extends ListFragment
     private ImageButton mBtnLike;
     private ImageView mBtnShuffle;
 
+    private FrameLayout mLibraryLayout;
+
     public static SeekBar sSeekbarController;
     public static TextView sCurrentTime;
     private TextView mTotalTime;
@@ -91,7 +94,7 @@ public class MediaPlaybackFragment extends ListFragment
     private boolean mCheckFlag = false;
     private boolean mRepeatFlag = false;                //  kiem tra che do lap lai
     private boolean mPlayContinueFlag = true;
-    private boolean mPlayListFlag = false;
+    private boolean mCheckLibrary = false;
     private boolean mLikeFlag = false;                  // kiem tra like cua bai hat
     private boolean mDislikeFlag = false;               // kiem tra dislike cua bai hat
 
@@ -168,6 +171,8 @@ public class MediaPlaybackFragment extends ListFragment
 
         playerLayout = view.findViewById(R.id.linear_player_layout);
 
+        mLibraryLayout = view.findViewById(R.id.library);
+
         sSeekbarController = view.findViewById(R.id.seekbar_controller);
 
         // textview hien thi thoi gian choi va tong thoi gian cua thanh seekbar
@@ -197,15 +202,10 @@ public class MediaPlaybackFragment extends ListFragment
 
             int like = bundle.getInt(Key.CONST_LIKE);
             likeMuisc(like);
-            mLibaryMusic.setOnClickListener(v -> {
-                mainActivity.playerSheetAll.setVisibility(View.VISIBLE);
-                getActivity().getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.fragment, new AllSongFragment())
-                        .commit();
-            });
-
         }
 
+
+        mLibaryMusic.setOnClickListener(this);
         mBtnNext.setOnClickListener(this);
         mBtnPrev.setOnClickListener(this);
         mBtnReplay.setOnClickListener(this);
@@ -246,6 +246,22 @@ public class MediaPlaybackFragment extends ListFragment
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
+            case R.id.queue_music:{
+                if (mCheckLibrary) {
+                    mImageMusic.setVisibility(View.VISIBLE);
+                    mLibraryLayout.setVisibility(View.GONE);
+                    mCheckLibrary = false;
+                } else {
+                    mImageMusic.setVisibility(View.GONE);
+                    mLibraryLayout.setVisibility(View.VISIBLE);
+                    getActivity().getSupportFragmentManager()
+                            .beginTransaction()
+                            .replace(R.id.library, new AllSongFragment())
+                            .commit();
+                    mCheckLibrary = true;
+                }
+                break;
+            }
             // play/pause ben mediafragment
             case R.id.img_btn_play: {
                 if (mCheckFlag) {
@@ -442,39 +458,14 @@ public class MediaPlaybackFragment extends ListFragment
     // phat nhac
     private void attachMusic(Song song){
         mBtnPlayPause.setImageResource(R.drawable.ic_play_black);
-
         sMusicService.playMedia(song);
         setControls();
-
-        // neu ko che do phat ngau nhien thi se next bai nhu binh thuong
-        if (!mIsCheckShuffle) {
-            if (sMusicService.checkOnCompletionListener()){
-                mBtnPlayPause.setImageResource(R.drawable.ic_play_black);
-                if (mPlayContinueFlag) {
-                    if (mCurrentPosition + 1 < mSongsList.size()) {
-                        mSongsList.get(mCurrentPosition).setPlay(0);
-                        mAllSongOperations.updateSong(mSongsList.get(mCurrentPosition));
-
-                        mCurrentPosition += 1;
-                        attachMusic(mSongsList.get(mCurrentPosition));
-                        musicNextPre(mSongsList, mCurrentPosition);
-                        setCountPlay(mSongsList.get(mCurrentPosition));
-
-                    } else {
-                        mSongsList.get(mCurrentPosition).setPlay(0);
-                        mAllSongOperations.updateSong(mSongsList.get(mCurrentPosition));
-                        mCurrentPosition = 0;
-                        setCountPlay(mSongsList.get(mCurrentPosition));
-                        musicNextPre(mSongsList, mCurrentPosition);
-                        attachMusic(mSongsList.get(mCurrentPosition));
-                    }
-                }
-            }
-        }
     }
+
 
     // set thoie gian chay tren thanh seek bar
     private void setControls() {
+        Log.d("MinhMX", "setControls: " + sMusicService.getMediaPlayer().getDuration());
         sSeekbarController.setMax(sMusicService.getMediaPlayer().getDuration());
         playCycle();
         mCheckFlag = true;
@@ -598,7 +589,6 @@ public class MediaPlaybackFragment extends ListFragment
                      .beginTransaction()
                      .replace(R.id.fragment, mediaPlayFragment)
                      .addToBackStack("fragment_media").commit();
-        setControls();
     }
 
     private Bundle getBundle(Song currSong){

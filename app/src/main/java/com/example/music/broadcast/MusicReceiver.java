@@ -5,7 +5,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
-import android.util.Log;
 
 import androidx.annotation.RequiresApi;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
@@ -48,15 +47,14 @@ public class MusicReceiver extends BroadcastReceiver {
         mFavoritesOperations = new FavoritesOperations(context);
 
         mSongsList = new ArrayList<>();
-        Log.d("MinhMX", "onReceive: " + iNotification);
-        //TODO HoanNTg: Mỗi lần receive broadcast lại phải query allsong từ database à?
+
         mSongsList = mAllSongOperations.getAllSong();
 
         mPosition = intent.getIntExtra(Key.KEY_POSITION, 0);
 
         Intent intentActivity = new Intent(context, MainActivity.class).setAction(intent.getAction());
         intentActivity.putExtra(Key.KEY_POSITION, mPosition);
-        Log.d("MinhMX", "onReceive:" + intentActivity.getAction());
+
         LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
 
         switch (intent.getAction()) {
@@ -98,9 +96,6 @@ public class MusicReceiver extends BroadcastReceiver {
                     position = 0;
                 }
                 Song song = mSongsList.get(position);
-                if (iNotification!= null) {
-                    iNotification.nextPlay(position);
-                }
                 song.setPlay(1);
                 song.setCountOfPlay(song.getCountOfPlay() + 1);
                 if (song.getCountOfPlay() == 3) {
@@ -156,10 +151,6 @@ public class MusicReceiver extends BroadcastReceiver {
             }
             default: break;
         }
-    }
-
-    public int getPosition() {
-        return mPosition;
     }
 
 }

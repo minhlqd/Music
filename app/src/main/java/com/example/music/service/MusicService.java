@@ -101,8 +101,6 @@ public class MusicService extends Service {
 
         mPosition = intent.getIntExtra(Key.KEY_POSITION, 0);
 
-        Log.d("MinhMX", "onStartCommand: " + mPosition);
-
         Song song = mSongsList.get(mPosition);
         sendNotification(this, song, mPosition);
 
@@ -112,7 +110,7 @@ public class MusicService extends Service {
     public void sendNotification(Context context, Song song, int position) {
         if (mINotification != null) {
             //mSongsList = mAllSongOperations.getAllSong();
-            mINotification.nextPlay(position);
+            mINotification.onClickNotification(position);
         }
         switch (song.isLike()) {
             case Key.NO_LIKE:{
@@ -168,12 +166,10 @@ public class MusicService extends Service {
         PendingIntent pendingIntentDislike =
                 PendingIntent.getBroadcast(context, REQUEST_CODE, intentDislikeSong, PendingIntent.FLAG_UPDATE_CURRENT);
 //        Log.d("position", "sendNotification: " + position);
-//        Intent intent = new Intent(context, MusicReceiver.class);
-//         sendBroadcast(intentPlaySong);
-//        Intent intentActivity = new Intent(context, MainActivity.class);
-//        intentActivity.putExtra(Key.KEY_POSITION, position);
-//        PendingIntent pendingIntentActivity =
-//                PendingIntent.getActivity(context, REQUEST_CODE, intentActivity, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        Intent intentActivity = new Intent(context, MainActivity.class).putExtra(Key.KEY_POSITION, position);
+        PendingIntent pendingIntentActivity =
+                PendingIntent.getActivity(context, REQUEST_CODE, intentActivity, PendingIntent.FLAG_UPDATE_CURRENT);
 
         RemoteViews notification_small = new RemoteViews(context.getPackageName(), R.layout.notification_small);
         RemoteViews notification_big = new RemoteViews(context.getPackageName(), R.layout.notification_big);
@@ -216,9 +212,13 @@ public class MusicService extends Service {
         Notification notificationMusic = new NotificationCompat.Builder(context, CHANNEL_ID)
                 .setSmallIcon(R.drawable.splash_play_music_192)
                 .setStyle(new NotificationCompat.DecoratedCustomViewStyle())
+                .setContentIntent(pendingIntentActivity)
                 .setCustomContentView(notification_small)
                 .setCustomBigContentView(notification_big)
                 .build();
+
+        mPosition = position;
+
         if (mIsNotification) {
             startForeground(NOTIFY_ID, notificationMusic);
             mIsNotification = false;
@@ -271,6 +271,7 @@ public class MusicService extends Service {
 
     public void playMedia(Song song){
         try {
+
             mediaPlayer.reset();
             checkOnCompletionListener = false;
             mediaPlayer.setDataSource(song.getPath());
@@ -281,17 +282,19 @@ public class MusicService extends Service {
         }
     }
 
-    public boolean checkOnCompletionListener () {
+    public int completeListenMusic(int postion) {
+        mPosition = postion;
         mediaPlayer.setOnCompletionListener(mp -> {
-            checkOnCompletionListener = true;
+            mPosition = postion + 1;
+            if (mPosition>mSongsList.size()) {
+                mPosition = 0;
+            }
         });
-        return checkOnCompletionListener;
+        return mPosition;
     }
-
     @Override
     public void onDestroy() {
         super.onDestroy();
-        Log.d("MinhMX", "onDestroy: " + mPosition);
         stopForeground(true);
     }
 }
