@@ -93,6 +93,7 @@ public class AllSongFragment extends ListFragment implements ICallBack {
         mSongsList = mAllSongOperations.getAllSong();
 
         mSongAdapter = new SongAdapter(getContext(), mSongsList, this);
+
         if (!mCreateDataParse.queryText().equals("")) {
             mSongAdapter = onQueryTextChange();
             mSongAdapter.notifyDataSetChanged();
@@ -148,12 +149,13 @@ public class AllSongFragment extends ListFragment implements ICallBack {
         }
     }
 
-    private Bundle getBundle(Song currSong) {
+    private Bundle getBundle(Song currSong, int position) {
         Bundle bundleMedia = new Bundle();
         bundleMedia.putLong(Key.CONST_IMAGE, currSong.getImage());
         bundleMedia.putInt(Key.CONST_LIKE, currSong.isLike());
         bundleMedia.putString(Key.CONST_TITLE, currSong.getTitle());
         bundleMedia.putString(Key.CONST_SUBTITLE, currSong.getSubTitle());
+        bundleMedia.putInt(Key.KEY_POSITION, position);
         return bundleMedia;
     }
 
@@ -181,7 +183,7 @@ public class AllSongFragment extends ListFragment implements ICallBack {
 
                 mCreateDataParse.onDataPassSong(mSongsList.get(i));
                 MediaPlaybackFragment mediaPlayFragment = new MediaPlaybackFragment();
-                mediaPlayFragment.setArguments(getBundle(songsList));
+                mediaPlayFragment.setArguments(getBundle(songsList, i));
 
                 // lay du lieu dc gui tu activity va kiem tra xem dt dang xoay theo chieu ngang hay doc
                 if (mCreateDataParse.checkScreen()) {

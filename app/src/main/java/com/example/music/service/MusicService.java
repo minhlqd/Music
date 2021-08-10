@@ -87,10 +87,6 @@ public class MusicService extends Service {
     @Override
     protected void attachBaseContext(Context newBase) {
         super.attachBaseContext(newBase);
-        // if (mIsContext) {
-        //    mINotification = (INotification) newBase;
-        //    mIsContext = false;
-        // }
         mAllSongOperations = new AllSongOperations(newBase);
     }
 
@@ -109,7 +105,6 @@ public class MusicService extends Service {
 
     public void sendNotification(Context context, Song song, int position) {
         if (mINotification != null) {
-            //mSongsList = mAllSongOperations.getAllSong();
             mINotification.onClickNotification(position);
         }
         switch (song.isLike()) {
@@ -131,14 +126,7 @@ public class MusicService extends Service {
             default:
                 throw new IllegalStateException("Unexpected value: " + song.isLike());
         }
-        Log.d("MinhMX", "sendNotification: " + song.getPlay());
-//        if (song.getPlay() == CHECK_PLAY) {
-//            mImgPlayPause = R.drawable.play_icon;
-//        } else {
-//            mImgPlayPause = R.drawable.pause_icon;
-//        }
 
-        Log.d("MinhMX", "sendNotification: " + mINotification);
 
         Intent intentNextSong = new Intent(context, MusicReceiver.class)
                 .setAction(Key.ACTION_NEXT_SONG).putExtra(Key.KEY_POSITION, position);
@@ -182,6 +170,11 @@ public class MusicService extends Service {
             }
         } catch (IOException e) {
             e.printStackTrace();
+        }
+
+        Log.d("aaa", "sendNotification: " + bitmap);
+        if (bitmap == null) {
+            bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.splash_play_music_192);
         }
 
         notification_small.setImageViewBitmap(R.id.image_music_notification, bitmap);

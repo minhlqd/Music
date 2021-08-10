@@ -114,6 +114,7 @@ public class AllSongOperations {
         close();
     }
 
+    //HoanNTg TODO: Hàm getAllSong này được get nhiều lần quá, xem lại xem nên get những lúc nào
     // lay tat ca bai hat tu database
     public ArrayList<Song> getAllSong() {
         open();

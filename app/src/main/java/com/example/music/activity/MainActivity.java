@@ -44,6 +44,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.example.music.Key;
 import com.example.music.R;
+import com.example.music.adapter.SongAdapter;
 import com.example.music.broadcast.MusicReceiver;
 import com.example.music.database.AllSongOperations;
 import com.example.music.database.FavoritesOperations;
@@ -61,6 +62,12 @@ import com.google.android.material.snackbar.Snackbar;
 import java.util.ArrayList;
 
 @SuppressWarnings("ALL")
+
+//HoanNTg TODO: Check trường hợp trong bộ nhớ k có bài hát
+//HoanNTg TODO: Phần replace fragment vẫn bị lặp code nhiều -> gộp hàm
+//HoanNTg TODO: Xem lại cái dùng fragment, làm sao để không phải new nhiều lần như vậy
+//HoanNTg TODO: Em xem lại phần sửa dụng biến static nhé, chỉ để static cho các key, k để lung tung gây tốn tài nguyên
+//HoanNTg TODO: Một số chỗ vẫn sai convention, em tự rà lại nhé
 public class MainActivity extends AppCompatActivity implements
         View.OnClickListener
         , ICreateDataParseSong
@@ -68,26 +75,26 @@ public class MainActivity extends AppCompatActivity implements
         , INotification{
 
     public static final String TAG = "MinhMX";
-    private Menu menu;
+    private Menu menu;//HoanNTg TODO: Sai convention
     private TextView mTitle;
     private TextView mSubtitle;
     private ImageView mPlayPauseSong;
     private ImageView mImgSong;
 
-    public LinearLayout playerSheetAll;
+    public LinearLayout playerSheetAll;//HoanNTg TODO: Sai convention
 
-    public static SeekBar sSeekbarController;
+    //HoanNTg TODO: Sao service lại view là static là static
+    //HoanNTg TODO: Sao vẫn còn seekbar với currentTime bên này, k dùng nữa thì e bỏ đi nhé
     private DrawerLayout mDrawerLayout;
-    public static TextView sCurrentTime;
-    private TextView mTotalTime;
 
-    public LinearLayout playerLayout;
 
     private ArrayList<Song> mSongsList;
     private RecyclerView mRecyclerView;
     private int mCurrentPosition = 0;
     private String mSearchText = "";
     private Song mCurrentSong;
+
+    private SongAdapter mSongAdapter;
 
     private FrameLayout mFragmentAllSong;
     private FrameLayout mFragmentMediaPlay;
@@ -121,7 +128,7 @@ public class MainActivity extends AppCompatActivity implements
     private MusicReceiver mReceiver = new MusicReceiver();
 
     private boolean mIsBinder = false;
-    public static MusicService sMusicService;          // service choi nhac
+    public static MusicService sMusicService;          // service choi nhac //HoanNTg TODO: Sao service lại phải để là biến static nhỉ // su dung ben broadcast
 
     private Display mDisplay;
     private Intent mIntnetBroadcast;
@@ -169,16 +176,17 @@ public class MainActivity extends AppCompatActivity implements
 //            mCurrentPosition = intent.getIntExtra(Key.KEY_POSITION, -1);
 //            playSong(mCurrentPosition);
 //            playMusic(mSongsList.get(mCurrentPosition));
-//            Log.d(TAG, "onCreate: " + mSongsList.get(mCurrentPosition).getTitle());
 //        }
 
         // cap nhat lai trang thai cua UI sau khi xoay man hinh
         if (savedInstanceState != null) {
             mCurrentPosition = savedInstanceState.getInt(Key.KEY_POSITION);
-            attachMusic(mDataSongList.get(mCurrentPosition));
+            attachMusic(mSongsList.get(mCurrentPosition));
             playSong(mCurrentPosition);
         } else {
-             playMusic(mDataSongList.get(0));
+             if (mSongsList.size() > 0) {
+                 playMusic(mSongsList.get(0));
+             }
         }
 
     }
@@ -199,12 +207,6 @@ public class MainActivity extends AppCompatActivity implements
 
         mFragmentAllSong = findViewById(R.id.fragment);
         mFragmentMediaPlay = findViewById(R.id.fragment_media);
-
-        sSeekbarController = findViewById(R.id.seekbar_controller);
-
-        // textview hien thi thoi gian choi va tong thoi gian cua thanh seekbar
-        sCurrentTime = findViewById(R.id.tv_current_time);
-        mTotalTime = findViewById(R.id.tv_total_time);
 
         // cac view thuoc player sheet de hien thi bai hat dang choi o all song fragment
         mTitle = findViewById(R.id.tv_music_name);
@@ -227,7 +229,6 @@ public class MainActivity extends AppCompatActivity implements
         actionBar.setDisplayHomeAsUpEnabled(true);
         actionBar.setHomeAsUpIndicator(R.drawable.menu_icon);
 
-        AllSongFragment createAllSongs = new AllSongFragment();
 
         // xac dinh man hinh ngang hay doc de hien thi cac fragment
         if (mDisplay.getRotation() == Surface.ROTATION_90 ||
@@ -353,6 +354,7 @@ public class MainActivity extends AppCompatActivity implements
                             , 0
                             , 0
                             , 0));
+
                 }
             }
             for (int i = 0; i < mDataSongList.size(); i++) {
@@ -542,7 +544,7 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     // dinh dang lai thoi gian
-    public static String getTimeFormatted(long milliSeconds) {
+    private String getTimeFormatted(long milliSeconds) {
         String finalTimerString = "";
         String secondsString;
 
@@ -593,18 +595,21 @@ public class MainActivity extends AppCompatActivity implements
             getSupportFragmentManager().popBackStack();
             count--;
         }
-        getSupportFragmentManager().beginTransaction().replace(R.id.fragment, new AllSongFragment()).commit();
-        playMusic(mSongsList.get(mCurrentPosition));
-        playerSheetAll.setVisibility(View.VISIBLE);
-        if (sMusicService.isPlaying()) {
-            mPlayPauseSong.setImageResource(R.drawable.ic_pause_black);
-        } else {
-            mPlayPauseSong.setImageResource(R.drawable.ic_play_black);
+        if (!mCheckScreen) {
+            getSupportFragmentManager().beginTransaction().replace(R.id.fragment, new AllSongFragment()).commit();
+            playMusic(mSongsList.get(mCurrentPosition));
+            mToolbar.setTitle(mSongsList.get(mCurrentPosition).getTitle());
+            playerSheetAll.setVisibility(View.VISIBLE);
+            if (sMusicService.isPlaying()) {
+                mPlayPauseSong.setImageResource(R.drawable.ic_pause_black);
+            } else {
+                mPlayPauseSong.setImageResource(R.drawable.ic_play_black);
+            }
+            mCheckBackPress = true;
+            mCheckPlayerSheet = false;
+            mCkeckPlay = false;
+            mCheckAttach = true;
         }
-        mCheckBackPress = true;
-        mCheckPlayerSheet = false;
-        mCkeckPlay = false;
-        mCheckAttach = true;
     }
 
     // gui du lieu qua bundle
@@ -645,7 +650,6 @@ public class MainActivity extends AppCompatActivity implements
     public void onDataPass(Song song) {
         attachMusic(song);
         mCkeckPlay = true;
-        playerLayout.setVisibility(View.VISIBLE);
     }
 
     @Override
@@ -679,7 +683,6 @@ public class MainActivity extends AppCompatActivity implements
     public String queryText() {
         return mSearchText.toLowerCase();
     }
-
 
     @Override
     public boolean isSong() {
@@ -728,7 +731,9 @@ public class MainActivity extends AppCompatActivity implements
                 if (mSongsList == null) {
                     mSongsList = mAllSongOperations.getAllSong();
                 }
-                playMusic(mSongsList.get(mCurrentPosition));
+                if (mSongsList.size()>0) {
+                    playMusic(mSongsList.get(mCurrentPosition));
+                }
                 getSupportFragmentManager()
                         .beginTransaction()
                         .replace(R.id.fragment, new AllSongFragment())
@@ -747,7 +752,6 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        Log.d(TAG, "onDestroy: ");
         sMusicService.getMediaPlayer().release();
         unregisterReceiver(mReceiver);
     }
@@ -767,6 +771,7 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     private void updateUI(int position) {
+        //HoanNTg TODO: sao mỗi lần play hay next bài hát lại phải replace lại fragment?
         if (mCheckAcitvity) {
             if (mCheckScreen) {
                 MediaPlaybackFragment mediaPlayFragment = new MediaPlaybackFragment();
@@ -794,15 +799,16 @@ public class MainActivity extends AppCompatActivity implements
                             .beginTransaction()
                             .replace(R.id.fragment, new AllSongFragment())
                             .addToBackStack("fragment").commit();
-                } else {
-                    mSongsList = mAllSongOperations.getAllSong();
-                    MediaPlaybackFragment mediaPlayFragment = new MediaPlaybackFragment();
-                    mediaPlayFragment.setArguments(getBundle(mSongsList.get(position), mCurrentPosition));
-                    getSupportFragmentManager()
-                            .beginTransaction()
-                            .replace(R.id.fragment, mediaPlayFragment)
-                            .addToBackStack("fragment_media").commit();
                 }
+//                else {
+//                    mSongsList = mAllSongOperations.getAllSong();
+//                    MediaPlaybackFragment mediaPlayFragment = new MediaPlaybackFragment();
+//                    mediaPlayFragment.setArguments(getBundle(mSongsList.get(position), mCurrentPosition));
+//                    getSupportFragmentManager()
+//                            .beginTransaction()
+//                            .replace(R.id.fragment, mediaPlayFragment)
+//                            .addToBackStack("fragment_media").commit();
+//                }
             }
         }
     }

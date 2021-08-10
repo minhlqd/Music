@@ -78,18 +78,13 @@ public class MediaPlaybackFragment extends ListFragment
 
     private FrameLayout mLibraryLayout;
 
-    public static SeekBar sSeekbarController;
-    public static TextView sCurrentTime;
+    private SeekBar mSeekbarController;
+    private TextView mCurrentTime;
     private TextView mTotalTime;
-
-    public LinearLayout playerLayout;
-
-    private MainActivity mainActivity;
-
-    private boolean checkSurface = false;
-
+    
+    
+    
     private int mPosition;
-    private MusicService musicService;
 
     private boolean mCheckFlag = false;
     private boolean mRepeatFlag = false;                //  kiem tra che do lap lai
@@ -111,6 +106,7 @@ public class MediaPlaybackFragment extends ListFragment
 
     private FavoritesOperations mFavoritesOperations;
 
+    //HoanNTg TODO: Sao service lại phải để 2 biến là static nhỉ
     public static Handler handler;
     public static Runnable runnable;
 
@@ -140,7 +136,6 @@ public class MediaPlaybackFragment extends ListFragment
         super.onAttach(context);
         mFavoritesOperations = new FavoritesOperations(context);
         mAllSongOperations = new AllSongOperations(context);
-        mainActivity = (MainActivity) context;
     }
 
     @Override
@@ -168,15 +163,14 @@ public class MediaPlaybackFragment extends ListFragment
         mBtnDisLike = view.findViewById(R.id.img_btn_dislike);
         mBtnLike = view.findViewById(R.id.img_btn_like);
         mBtnShuffle = view.findViewById(R.id.img_btn_shuffle);
-
-        playerLayout = view.findViewById(R.id.linear_player_layout);
+        
 
         mLibraryLayout = view.findViewById(R.id.library);
 
-        sSeekbarController = view.findViewById(R.id.seekbar_controller);
+        mSeekbarController = view.findViewById(R.id.seekbar_controller);
 
         // textview hien thi thoi gian choi va tong thoi gian cua thanh seekbar
-        sCurrentTime = view.findViewById(R.id.tv_current_time);
+        mCurrentTime = view.findViewById(R.id.tv_current_time);
         mTotalTime = view.findViewById(R.id.tv_total_time);
 
         mSmallImageMusic.setVisibility(View.VISIBLE);
@@ -202,8 +196,16 @@ public class MediaPlaybackFragment extends ListFragment
 
             int like = bundle.getInt(Key.CONST_LIKE);
             likeMuisc(like);
+            mIsCheckShuffle = bundle.getBoolean("Shuffle");
+
+            Log.d("aaa", "onViewCreated: + shuffle " + mIsCheckShuffle);
+
+            if (mIsCheckShuffle) {
+                mBtnShuffle.setImageResource(R.drawable.ic_shuffle_black);
+            }
         }
 
+        completeMusic();
 
         mLibaryMusic.setOnClickListener(this);
         mBtnNext.setOnClickListener(this);
@@ -296,23 +298,11 @@ public class MediaPlaybackFragment extends ListFragment
                     Toast.makeText(getContext(), "Replaying Removed..", Toast.LENGTH_SHORT).show();
                     mBtnReplay.setImageResource(R.drawable.ic_repeat);
                     sMusicService.looping(true);
-
-                    // add vao Preferences
-                    // SharedPreferences.Editor preferencesEditor = mPreferences.edit();
-                    // preferencesEditor.putInt(Key.KEY_POSITION, mCurrentPosition);
-                    // preferencesEditor.apply();
-
                     mRepeatFlag = false;
                 } else {
                     Toast.makeText(getContext(), "Replaying Added..", Toast.LENGTH_SHORT).show();
                     mBtnReplay.setImageResource(R.drawable.ic_repeat_one);
                     sMusicService.looping(false);
-
-                    // clear Preferences
-                    // SharedPreferences.Editor preferencesEditor = mPreferences.edit();
-                    // preferencesEditor.clear();
-                    // preferencesEditor.apply();
-
                     mRepeatFlag = true;
                 }
                 break;
@@ -324,7 +314,7 @@ public class MediaPlaybackFragment extends ListFragment
                 if (mCheckFlag) {
 
                     // neu bai hat chay dc hon 3s thi phat lai tu dau
-                    if (sSeekbarController.getProgress() > 3000) {
+                    if (mSeekbarController.getProgress() > 3000) {
                         attachMusic(mSongsList.get(mCurrentPosition));
                     } else {
                         if (mCurrentPosition > 0) {
@@ -399,7 +389,6 @@ public class MediaPlaybackFragment extends ListFragment
 
             // like bai hat va them vao danh sach ua thich
             case R.id.img_btn_like:{
-                Log.d("Minhmx", "onClick: " + mLikeFlag);
                 if (mLikeFlag) {
                     mLikeFlag = false;
                     mFavoritesOperations.removeSong(mSongsList.get(mCurrentPosition).getTitle());
@@ -460,13 +449,38 @@ public class MediaPlaybackFragment extends ListFragment
         mBtnPlayPause.setImageResource(R.drawable.ic_play_black);
         sMusicService.playMedia(song);
         setControls();
+        completeMusic();
+    }
+
+    private void completeMusic() {
+        sMusicService.getMediaPlayer().setOnCompletionListener(mp -> {
+            Log.d("aaa", "attachMusic: " + mCurrentPosition);
+            if (mPlayContinueFlag) {
+                if (mCurrentPosition + 1 < mSongsList.size()) {
+                    mSongsList.get(mCurrentPosition).setPlay(0);
+                    mAllSongOperations.updateSong(mSongsList.get(mCurrentPosition));
+
+                    mCurrentPosition += 1;
+                    attachMusic(mSongsList.get(mCurrentPosition));
+                    musicNextPre(mSongsList, mCurrentPosition);
+                    setCountPlay(mSongsList.get(mCurrentPosition));
+
+                } else {
+                    mSongsList.get(mCurrentPosition).setPlay(0);
+                    mAllSongOperations.updateSong(mSongsList.get(mCurrentPosition));
+                    mCurrentPosition = 0;
+                    setCountPlay(mSongsList.get(mCurrentPosition));
+                    musicNextPre(mSongsList, mCurrentPosition);
+                    attachMusic(mSongsList.get(mCurrentPosition));
+                }
+            }
+        });
     }
 
 
     // set thoie gian chay tren thanh seek bar
     private void setControls() {
-        Log.d("MinhMX", "setControls: " + sMusicService.getMediaPlayer().getDuration());
-        sSeekbarController.setMax(sMusicService.getMediaPlayer().getDuration());
+        mSeekbarController.setMax(sMusicService.getMediaPlayer().getDuration());
         playCycle();
         mCheckFlag = true;
         if (sMusicService.isPlaying()) {
@@ -474,12 +488,12 @@ public class MediaPlaybackFragment extends ListFragment
             mBtnPlayPause.setBackground(getContext().getDrawable(R.drawable.background_play_pause));
         }
         mTotalTime.setText(getTimeFormatted(sMusicService.getMediaPlayer().getDuration()));
-        sSeekbarController.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+        mSeekbarController.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 if (fromUser) {
                     sMusicService.getMediaPlayer().seekTo(progress);
-                    sCurrentTime.setText(getTimeFormatted(progress));
+                    mCurrentTime.setText(getTimeFormatted(progress));
                 }
             }
 
@@ -496,10 +510,10 @@ public class MediaPlaybackFragment extends ListFragment
     }
 
     // lay thoi chay
-    public static void playCycle() {
+    private void playCycle() {
         try {
-            sSeekbarController.setProgress(sMusicService.getMediaPlayer().getCurrentPosition());
-            sCurrentTime.setText(getTimeFormatted(sMusicService.getMediaPlayer().getCurrentPosition()));
+            mSeekbarController.setProgress(sMusicService.getMediaPlayer().getCurrentPosition());
+            mCurrentTime.setText(getTimeFormatted(sMusicService.getMediaPlayer().getCurrentPosition()));
             if (sMusicService.isPlaying()) {
                 runnable = () -> playCycle();;
                 handler.postDelayed(runnable, 100);
@@ -573,7 +587,6 @@ public class MediaPlaybackFragment extends ListFragment
         } else {
             song.setPlay(0);
         }
-        Log.d("MinhMx", "updateNotification: " + song.getPlay());
         mAllSongOperations.updateSong(song);
         sMusicService.sendNotification(getContext(), song, position);
     }
@@ -583,6 +596,7 @@ public class MediaPlaybackFragment extends ListFragment
         mFavoritesOperations.addSongFav(favSong);
     }
     private void updateUI(int position) {
+        Log.d("MinhMX", "updateUI: " + position);
         MediaPlaybackFragment mediaPlayFragment = new MediaPlaybackFragment();
         mediaPlayFragment.setArguments(getBundle(mSongsList.get(position)));
         getActivity().getSupportFragmentManager()
@@ -599,6 +613,7 @@ public class MediaPlaybackFragment extends ListFragment
         bundle.putString(Key.CONST_SUBTITLE, currSong.getSubTitle());
         bundle.putString(Key.PATH_SONG, currSong.getPath());
         bundle.putInt(Key.KEY_POSITION, mCurrentPosition);
+        bundle.putBoolean("Shuffle", mIsCheckShuffle);
         return bundle;
     }
 

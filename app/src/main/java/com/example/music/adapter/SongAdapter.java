@@ -58,14 +58,14 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.ViewHolder> {
         holder.tvTitle.setText(songsList.getTitle());
         holder.queueMusic.setVisibility(View.GONE);
         if (songsList.getPlay() == 1) {
-            holder.tvTitle.setTypeface(holder.tvTitle.getTypeface(), Typeface.BOLD);
+            holder.tvTitle.setTypeface(null, Typeface.BOLD);
             holder.tvPosition.setVisibility(View.GONE);
             //holder.imageMusic.setVisibility(View.VISIBLE);
             holder.equalizerView.setVisibility(View.VISIBLE);
             holder.equalizerView.animateBars();
             holder.imageMusic.setImageResource(R.drawable.ic_play_all_song);
         } else {
-            holder.tvTitle.setTypeface(holder.tvTitle.getTypeface(), Typeface.NORMAL);
+            holder.tvTitle.setTypeface(null, Typeface.NORMAL);
             holder.tvPosition.setVisibility(View.VISIBLE);
             holder.imageMusic.setVisibility(View.GONE);
             holder.equalizerView.setVisibility(View.GONE);
@@ -159,4 +159,5 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.ViewHolder> {
             return false;
         }
     }
+
 }
